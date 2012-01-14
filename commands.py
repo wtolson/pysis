@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from functools import partial
+from multiprocessing import Pool
 from subprocess import call, check_output
 
 class IsisCommand(object):
@@ -14,7 +14,7 @@ class IsisCommand(object):
                 key = key[:-1]
 
             args.append('%s=%s' % (key, value))
-            
+
         return args
 
     def call(self, **kwargs):
@@ -37,5 +37,34 @@ class IsisCommand(object):
 class Isis(object):
     def __getattr__(self, name):
         return IsisCommand(name)
+
+
+
+class QueuedIsisCommand(IsisCommand):
+    def __init__(self, name, queue):
+        self.queue = queue
+        super(QueuedIsisCommand, self).__init__(name)
+
+
+    def __call__(self, **kwargs):
+        return self.queue.apply_async(check_output, [self.get_cmd(**kwargs)])
+
+
+
+class IsisPool(object):
+    def __init__(self, *args, **kwargs):
+        self.pool = Pool(*args, **kwargs)
+
+    def __getattr__(self, name):
+        if hasattr(self.pool, name):
+            return getattr(self.pool, name)
+
+        return QueuedIsisCommand(name, self)
+
+    def close_and_wait(self):
+        self.close()
+        self.join()
+
+
 
 isis = Isis()
