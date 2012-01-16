@@ -27,7 +27,7 @@ import re
 
 class EndFound(Exception):
     pass
-    
+
 
 class ParseError(Exception):
     def __init__(self, lineno, msg):
@@ -46,7 +46,8 @@ class LabelParser(object):
     valid_int = re.compile(r'^[-+]?[0-9]+$')
     valid_float = re.compile(r'^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$')
 
-    def __init__(self, DEBUG=False):
+    def __init__(self, split_units=True, DEBUG=False):
+        self.split_units = split_units
         self.DEBUG = DEBUG
 
     def debug(self, msg):
@@ -134,7 +135,10 @@ class LabelParser(object):
             self.current_key = None
 
         else:
-            units = self.unitparse.search(value)
+            units = None
+            if self.split_units:
+                units = self.unitparse.search(value)
+            
             if units:
                 v, u = units.groups()
                 value = {'value': v, 'units': u}
