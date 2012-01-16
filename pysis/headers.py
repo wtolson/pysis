@@ -23,7 +23,7 @@
 Various Python Utilities for working with Isis headers.
 """
 
-import yaml, re
+import re
 
 class EndFound(Exception):
     pass
@@ -31,9 +31,11 @@ class EndFound(Exception):
 
 class HeaderParser(object):
     unitparse = re.compile(r'^(.+)\<(.+?)\>$')
+    continuation = re.compile(r'-\n')
+    valid_int = re.compile(r'^[-+]?[0-9]+$')
+    valid_float = re.compile(r'^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$')
 
-    def __init__(self, indent=' ', DEBUG=False):
-        self.indent = indent
+    def __init__(self, DEBUG=False):
         self.DEBUG = DEBUG
 
     def debug(self, msg):
@@ -41,17 +43,16 @@ class HeaderParser(object):
             print msg
 
     def parse(self, header):
-        self.level = 0
-
-        lines = header.splitlines()
-        output = []
+        self.output = {}
+        self.cwd = self.output
         end_found = False
 
+        lines = header.splitlines()
         try:
             for line_no, line in enumerate(lines, 1):
                 self.line_no = line_no
                 self.debug('%s: %s' % (line_no, line))
-                output.append(self.parse_line(line))
+                self.parse_line(line)
 
         except EndFound:
             end_found = True
@@ -60,66 +61,126 @@ class HeaderParser(object):
         if not end_found:
             raise Exception('Unexpected end of header')
 
-        return '\n'.join(output)
+        self.format_output(self.output)
+        return self.output
 
 
     def parse_line(self, line):
         line = line.strip()
         if not line or line[0] == '#':
-            return line
+            return
 
         parts = line.split('=')
         if len(parts) == 1:
-            return self.parse_end_group(line)
+            self.parse_end_group(line)
 
         else:
-            return self.parse_parts(*parts)
+            self.parse_parts(*parts)
 
 
     def parse_end_group(self, line):
         if line == 'End_Group' or line == 'End_Object':
-            if self.level <= 0:
+            if self.cwd.get('__parent__') is None:
                 raise Exception('%s: Unexpected %s' % (self.line_no, line))
 
-            self.debug('End of level %s' % self.level)
-            self.level -= 1
+            parent = self.cwd['__parent__']
+            del self.cwd['__parent__']
+            self.cwd = parent
+            self.current_key = None
 
         elif line == 'End':
-            if self.level != 0:
+            if self.cwd.get('__parent__') is not None:
                 raise Exception('%s: Unexpected End' % self.line_no)
 
             self.debug('End Found')
             raise EndFound
 
         else:
-            raise Exception('%s: Unexpected %s' % (self.line_no, line))
+            if self.current_key is None:
+                raise Exception('%s: Unexpected %s' % (self.line_no, line))
 
-        return ''
+            current_value = self.cwd[self.current_key]
+            if isinstance(current_value, list):
+                current_value[-1] += '\n' + line
+
+            else:
+                self.cwd[self.current_key] += '\n' + line
+
+
 
     def parse_parts(self, key, *value):
         key = key.strip()
         value = '='.join(value).strip()
 
         if key == 'Object' or key == 'Group':
-            line = '%s%s:' % (self.level * self.indent, value)
-            self.level += 1
-            self.debug('Start of level %s' % self.level)
+            if value in self.cwd:
+                if not isinstance(self.cwd[value], list):
+                    self.cwd[value] = [self.cwd[value]]
 
-        else:
-            self.debug('Got key/vaue: %s/%s' % (key, value))
-            units = self.unitparse.search(value)
-            if units:
-                value, units = units.groups()
-                line = '\n'.join([
-                    '%s%s:' % (self.level * self.indent, key),
-                    '%svalue: %s' % ((self.level + 1) * self.indent, value),
-                    '%sunit: %s' % ((self.level + 1) * self.indent, units)
-                ])
+                self.cwd[value].append({'__parent__': self.cwd})
+                self.cwd = self.cwd[value][-1]
 
             else:
-                line = '%s%s: %s' % (self.level * self.indent, key, value)
+                self.cwd[value] = {'__parent__': self.cwd}
+                self.cwd = self.cwd[value]
+            
+            self.current_key = None
 
-        return line
+        else:
+            units = self.unitparse.search(value)
+            if units:
+                v, u = units.groups()
+                value = {'value': v, 'units': u}
+
+            if key in self.cwd:
+                if not isinstance(self.cwd[key], list):
+                    self.cwd[key] = [self.cwd[key]]
+
+                self.cwd[key].append(value)
+
+            else:
+                self.cwd[key] = value
+            
+            self.current_key = key
+
+
+    def format_output(self, cwd):
+        for key, value in cwd.iteritems():
+            cwd[key] = self.format_value(value)
+
+        return cwd
+
+
+    def format_value(self, value):
+        if isinstance(value, dict):
+            return self.format_output(value)
+
+        elif isinstance(value, list):
+            return [self.format_value(item) for item in value]
+
+        else:
+            return self.cast_value(value)
+
+
+    def cast_value(self, value):
+        value = self.continuation.sub('', value)
+        value = value.strip()
+
+        if not value or value.lower() == 'null':
+            return None
+
+        elif value[0] == '(' and value[-1] == ')':
+            return [self.cast_value(item) for item in value[1:-1].split(',')]
+
+        elif self.valid_int.match(value):
+            return int(value)
+
+        elif self.valid_float.match(value):
+            return float(value)
+
+        else:
+            return value
+
 
 
 def get_header(filename):
@@ -132,25 +193,21 @@ def get_header(filename):
     with open(filename) as f:
         buff = f.read(BUF_SIZE)
         while len(buff):
-            if "\0" in buff:
-                header.append(buff.split("\0")[0])
+            if '\0' in buff:
+                header.append(buff.split('\0')[0])
                 break
             else:
                 header.append(buff)
 
             buff = f.read(BUF_SIZE)
 
-    return "".join(header)
+    return ''.join(header)
 
 
 
 _parser = HeaderParser()
-def header2yaml(header):
-    return _parser.parse(header)
-
-
 def parse_header(header):
-    return yaml.load(header2yaml(header))
+    return _parser.parse(header)
 
 
 def parse_file_header(filename):

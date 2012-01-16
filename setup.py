@@ -11,7 +11,5 @@ setup(
     license='LICENSE.txt',
     description='Useful toolkit for working with Isis in Python.',
     long_description=open('README.md').read(),
-    install_requires=[
-        "PyYAML>=3.10"
-    ],
+    install_requires=[]
 )
