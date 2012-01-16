@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#   isis_utils.py
+#   labels.py
 #   Copyright 2011 William Trevor Olson <trevor@heytrevor.com>
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -17,13 +16,19 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-#
 
 """
 Various Python Utilities for working with Isis labels.
 """
 
 import re
+
+__all__ = [
+    'ParseError',
+    'LabelParser',
+    'parse_label',
+    'parse_file_label'
+]
 
 class EndFound(Exception):
     pass
@@ -195,7 +200,7 @@ class LabelParser(object):
 
 
 def get_label(filename):
-    """Gets the label of the specified isis file."""
+    """Extract the label string from the specified isis file."""
 
     BUF_SIZE = 65537
     unitparse = re.compile(r'^(.+)\<(.+?)\>$')
@@ -218,6 +223,7 @@ def get_label(filename):
 
 _parser = LabelParser()
 def parse_label(label):
+    """Returns a dictionary representation of the givin isis label."""
     return _parser.parse(label)
 
 
