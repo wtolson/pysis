@@ -20,16 +20,27 @@
 #
 
 """
-Various Python Utilities for working with Isis headers.
+Various Python Utilities for working with Isis labels.
 """
 
 import re
 
 class EndFound(Exception):
     pass
+    
+
+class ParseError(Exception):
+    def __init__(self, lineno, msg):
+        self.lineno = lineno
+        self.msg = msg
+
+        super(ParseError, self).__init__()
+
+    def __str__(self):
+        return 'Line %s: %s'
 
 
-class HeaderParser(object):
+class LabelParser(object):
     unitparse = re.compile(r'^(.+)\<(.+?)\>$')
     continuation = re.compile(r'-\n')
     valid_int = re.compile(r'^[-+]?[0-9]+$')
@@ -42,27 +53,23 @@ class HeaderParser(object):
         if self.DEBUG:
             print msg
 
-    def parse(self, header):
-        self.output = {}
-        self.cwd = self.output
-        end_found = False
+    def parse(self, label):
+        self.cwd = output = {}
 
-        lines = header.splitlines()
         try:
-            for line_no, line in enumerate(lines, 1):
-                self.line_no = line_no
-                self.debug('%s: %s' % (line_no, line))
+            for lineno, line in enumerate(label.splitlines(), 1):
+                self.lineno = lineno
+                self.debug('%s: %s' % (lineno, line))
                 self.parse_line(line)
 
         except EndFound:
             end_found = True
             pass
 
-        if not end_found:
-            raise Exception('Unexpected end of header')
+        else:
+            raise ParseError(lineno, 'Unexpected end of label')
 
-        self.format_output(self.output)
-        return self.output
+        return self.format_output(output)
 
 
     def parse_line(self, line):
@@ -81,7 +88,7 @@ class HeaderParser(object):
     def parse_end_group(self, line):
         if line == 'End_Group' or line == 'End_Object':
             if self.cwd.get('__parent__') is None:
-                raise Exception('%s: Unexpected %s' % (self.line_no, line))
+                raise ParseError(self.lineno, 'Unexpected %s' % line)
 
             parent = self.cwd['__parent__']
             del self.cwd['__parent__']
@@ -90,14 +97,14 @@ class HeaderParser(object):
 
         elif line == 'End':
             if self.cwd.get('__parent__') is not None:
-                raise Exception('%s: Unexpected End' % self.line_no)
+                raise ParseError(self.lineno, 'Unexpected End')
 
             self.debug('End Found')
             raise EndFound
 
         else:
             if self.current_key is None:
-                raise Exception('%s: Unexpected %s' % (self.line_no, line))
+                raise ParseError(self.lineno, 'Unexpected %s' % line)
 
             current_value = self.cwd[self.current_key]
             if isinstance(current_value, list):
@@ -183,33 +190,33 @@ class HeaderParser(object):
 
 
 
-def get_header(filename):
-    """Gets the header of the specified isis file."""
+def get_label(filename):
+    """Gets the label of the specified isis file."""
 
     BUF_SIZE = 65537
     unitparse = re.compile(r'^(.+)\<(.+?)\>$')
 
-    header = []
+    label = []
     with open(filename) as f:
         buff = f.read(BUF_SIZE)
         while len(buff):
             if '\0' in buff:
-                header.append(buff.split('\0')[0])
+                label.append(buff.split('\0')[0])
                 break
             else:
-                header.append(buff)
+                label.append(buff)
 
             buff = f.read(BUF_SIZE)
 
-    return ''.join(header)
+    return ''.join(label)
 
 
 
-_parser = HeaderParser()
-def parse_header(header):
-    return _parser.parse(header)
+_parser = LabelParser()
+def parse_label(label):
+    return _parser.parse(label)
 
 
-def parse_file_header(filename):
-    """Returns a dictionary representation of the givin isis file's header."""
-    return parse_header(get_header(filename))
+def parse_file_label(filename):
+    """Returns a dictionary representation of the givin isis file's label."""
+    return parse_label(get_label(filename))
