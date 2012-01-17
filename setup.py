@@ -5,7 +5,7 @@ from distutils.core import setup
 
 setup(
     name='Pysis',
-    version='0.2.0',
+    version='0.3.0',
     author='William Trevor Olson',
     author_email='wtolson@gmail.com',
     packages=['pysis'],

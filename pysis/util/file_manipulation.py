@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#   util.py
+#   file_manipulation.py
 #   Copyright 2011 William Trevor Olson <trevor@heytrevor.com>
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -18,11 +18,16 @@
 #
 
 """
-Utilities to help with common Isis patterns.
+Utilities to help with file manipulation.
 """
 
 from glob import iglob
 from os.path import splitext
+
+__all__ = [
+    'write_file_list',
+    'file_variations'
+]
 
 def write_file_list(filename, file_list=[], glob=None):
     """
