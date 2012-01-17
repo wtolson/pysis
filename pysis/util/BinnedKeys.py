@@ -47,7 +47,7 @@ class BinnedKeys(object):
         self.min_value = float(min_value)
         self.max_value = float(max_value)
 
-        if max_bin_size:
+        if max_bin_size is not None:
             num_bins = ceil((self.max_value - self.min_value) / max_bin_size)
 
         self.num_bins = int(num_bins)
