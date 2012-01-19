@@ -61,6 +61,9 @@ class BinnedKeys(object):
         Insert the `key` into a bin based on the given `value`. Optionally,
         `data` dictionary may be provided to attach arbitrary data to the key.
         """
+        if value < self.min_value or value > self.max_value:
+            raise BoundsError('item value out of bounds')
+
         item = BinnedKeys.Item(key, value, data)
 
         if item.value == self.max_value:
@@ -68,9 +71,6 @@ class BinnedKeys(object):
 
         else:
             index = int((item.value - self.min_value) / self.bin_size)
-
-        if index < 0 or index >= self.num_bins:
-            raise BoundsError('item value out of bounds')
 
         self.bins[index].append(item)
 
