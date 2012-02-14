@@ -4,17 +4,17 @@ from pysis.binning import *
 
 class TestConstWidthBinnedKeys(unittest.TestCase):
     def test_test(self):
-        self.assertEqual(1, 1)
+        self.fail('Unimplemented')
 
 
 class TestBoundedBinnedKeys(unittest.TestCase):
     def test_test(self):
-        self.assertEqual(1, 1)
+        self.fail('Unimplemented')
 
 
 class TestGeometricBinnedKeys(unittest.TestCase):
     def test_test(self):
-        self.assertEqual(1, 1)
+        self.fail('Unimplemented')
 
 
 

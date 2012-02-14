@@ -4,12 +4,12 @@ import pysis.commands
 
 class TestIsis(unittest.TestCase):
     def test_test(self):
-        self.assertEqual(1, 1)
+        self.fail('Unimplemented')
 
 
 class TestIsisPool(unittest.TestCase):
     def test_test(self):
-        self.assertEqual(1, 1)
+        self.fail('Unimplemented')
 
 
 if __name__ == '__main__':
