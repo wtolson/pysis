@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#   BinnedKeys.py
+#   ConstWidthBinnedKeys.py
 #   Copyright 2011 William Trevor Olson <trevor@heytrevor.com>
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -17,26 +17,14 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""
-Flexible class for creating binned data.
-"""
 
 from math import ceil
-from collections import namedtuple
-from itertools import izip
+from AbstractBinnedKeys import AbstractBinnedKeys
 
-__all__ = [
-    'BoundsError',
-    'BinnedKeys'
-]
-
-class BoundsError(IndexError):
-    pass
-
-
-class BinnedKeys(object):
-    Item = namedtuple('Item', ['key', 'value', 'data'])
-    Bounds = namedtuple('Bounds', ['min', 'max'])
+class ConstWidthBinnedKeys(AbstractBinnedKeys):
+    """
+    A Binned Keys construct where bins are of a constant width.
+    """
 
     def __init__(self, min_value, max_value, num_bins=None, max_bin_size=None):
         """
@@ -56,23 +44,14 @@ class BinnedKeys(object):
         self.bins = [[] for _ in xrange(self.num_bins)]
 
 
-    def insert(self, key, value, data={}):
+    def get_bin_index(self, value):
         """
-        Insert the `key` into a bin based on the given `value`. Optionally,
-        `data` dictionary may be provided to attach arbitrary data to the key.
+        Used to get the index of the bin to place a particular value.
         """
-        if value < self.min_value or value > self.max_value:
-            raise BoundsError('item value out of bounds')
+        if value == self.max_value:
+            return self.num_bins - 1
 
-        item = BinnedKeys.Item(key, value, data)
-
-        if item.value == self.max_value:
-            index = self.num_bins - 1
-
-        else:
-            index = int((item.value - self.min_value) / self.bin_size)
-
-        self.bins[index].append(item)
+        return int((value - self.min_value) / self.bin_size)
 
 
     def get_bounds(self, bin_num):
@@ -84,37 +63,3 @@ class BinnedKeys(object):
         max_bound = min_bound + self.bin_size
 
         return BinnedKeys.Bounds(min_bound, max_bound)
-        
-
-    def iterkeys(self):
-        """
-        An iterator over the keys of each bin.
-        """
-        def _iterkeys(bin):
-            for item in bin:
-                yield item.key
-
-        for bin in self.bins:
-            yield _iterkeys(bin)
-
-
-    def iterbounds(self):
-        """
-        An iterator over each bins bounds.
-        """
-        for bin_num in xrange(self.num_bins):
-            yield self.get_bounds(bin_num)
-
-
-    def iterbins_bounds(self):
-        """
-        Iterate over each bin and its bounds.
-        """
-        return izip(self.bins, self.iterbounds())
-
-
-    def iterkeys_bounds(self):
-        """
-        Iterate over the keys of each bin as well as its bounds.
-        """
-        return izip(self.iterkeys(), self.iterbounds())

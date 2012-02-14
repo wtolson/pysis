@@ -17,7 +17,9 @@
 #
 
 """
-Utilities to help with common Isis patterns.
+Utilities to help with various binning methods.
 """
 
-from file_manipulation import *
+from ConstWidthBinnedKeys import ConstWidthBinnedKeys
+from BoundedBinnedKeys import BoundedBinnedKeys
+from GeometricBinnedKeys import GeometricBinnedKeys
