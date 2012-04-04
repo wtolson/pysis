@@ -65,7 +65,7 @@ class LabelParser(object):
         self.cwd = output = {}
 
         # Add an implecit end to the label.
-        label = label + '\nEND'
+        label = label + '\nEnd'
 
         try:
             for lineno, line in enumerate(label.splitlines(), 1):
