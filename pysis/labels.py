@@ -55,6 +55,8 @@ class LabelParser(object):
         self.split_units = split_units
         self.DEBUG = DEBUG
 
+        self.current_key = None
+
     def debug(self, msg):
         if self.DEBUG:
             print msg
@@ -136,14 +138,14 @@ class LabelParser(object):
             else:
                 self.cwd[value] = {'__parent__': self.cwd}
                 self.cwd = self.cwd[value]
-            
+
             self.current_key = None
 
         else:
             units = None
             if self.split_units:
                 units = self.unitparse.search(value)
-            
+
             if units:
                 v, u = units.groups()
                 value = {'value': v, 'units': u}
@@ -156,7 +158,7 @@ class LabelParser(object):
 
             else:
                 self.cwd[key] = value
-            
+
             self.current_key = key
 
 
