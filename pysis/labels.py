@@ -42,7 +42,7 @@ class ParseError(Exception):
         super(ParseError, self).__init__()
 
     def __str__(self):
-        return 'Line %s: %s'
+        return 'Line %s: %s' % (self.lineno, self.msg)
 
 
 class LabelParser(object):
@@ -63,6 +63,9 @@ class LabelParser(object):
 
     def parse(self, label):
         self.cwd = output = {}
+
+        # Add an implecit end to the label.
+        label = label + '\nEND'
 
         try:
             for lineno, line in enumerate(label.splitlines(), 1):
