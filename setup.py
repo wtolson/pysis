@@ -8,7 +8,11 @@ setup(
     version='0.3.1',
     author='William Trevor Olson',
     author_email='wtolson@gmail.com',
-    packages=['pysis'],
+    packages=[
+        'pysis',
+        'pysis.binning',
+        'pysis.util'
+    ],
     scripts=[],
     url='https://github.com/wtolson/Pysis',
     license='LICENSE.txt',
