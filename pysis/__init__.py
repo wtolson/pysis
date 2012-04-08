@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import os
+import os, sys
 
 ISIS_ROOT = os.environ.get('ISISROOT')
 if ISIS_ROOT is None:
-    print 'Warning! ISISROOT is not defined. Bitch.'
+    sys.stderr.write('Warning! ISISROOT is not defined. Bitch.\n')
 
     (ISIS_VERSION, ISIS_VERSION_MAJOR, ISIS_VERSION_MINOR,
         ISIS_VERSION_PATCH, ISIS_VERSION_BUILD) = 5 * (None,)
