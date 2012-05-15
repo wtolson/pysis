@@ -26,6 +26,7 @@ import re
 __all__ = [
     'ParseError',
     'LabelParser',
+    'get_label',
     'parse_label',
     'parse_file_label'
 ]
@@ -125,7 +126,6 @@ class LabelParser(object):
                 self.cwd[self.current_key] += '\n' + line
 
 
-
     def parse_parts(self, key, *value):
         key = key.strip()
         value = '='.join(value).strip()
@@ -203,35 +203,60 @@ class LabelParser(object):
             return value
 
 
+def get_label(stream, BUF_SIZE=65537):
+    """Extract the label string from an isis file.
 
-def get_label(filename):
-    """Extract the label string from the specified isis file."""
+    Arguments:
+        stream: If stream is a string it will be treated as a filename other
+            wise it will be treated as if it were a file object.
+        BUF_SIZE: The chunksize to read the label in by.
 
-    BUF_SIZE = 65537
-    unitparse = re.compile(r'^(.+)\<(.+?)\>$')
+    Returns:
+        The label of the isis file as a string.
+    """
+    if isinstance(stream, basestring):
+        with open(stream) as f:
+            return get_label(f)
 
     label = []
-    with open(filename) as f:
-        buff = f.read(BUF_SIZE)
-        while len(buff):
-            if '\0' in buff:
-                label.append(buff.split('\0')[0])
-                break
-            else:
-                label.append(buff)
+    buff = stream.read(BUF_SIZE)
 
-            buff = f.read(BUF_SIZE)
+    while len(buff):
+        label_end = buff.find('\0')
+
+        if label_end == -1:
+            label.append(buff)
+        else:
+            label.append(buff[:label_end])
+            break
+
+        buff = stream.read(BUF_SIZE)
 
     return ''.join(label)
 
 
+def parse_label(label, split_units=True):
+    """ Parse an isis label.
 
-_parser = LabelParser()
-def parse_label(label):
-    """Returns a dictionary representation of the givin isis label."""
-    return _parser.parse(label)
+    Arguments:
+        label: An isis label as a string.
+        split_units: A boolean specifying whether to parse units from values.
+
+    Returns:
+        A dictionary representation of the given isis label.
+    """
+    return LabelParser(split_units=split_units).parse(label)
 
 
-def parse_file_label(filename):
-    """Returns a dictionary representation of the givin isis file's label."""
-    return parse_label(get_label(filename))
+def parse_file_label(stream, split_units=True):
+    """ Parse an isis label.
+
+    Arguments:
+        stream: If stream is a string it will be treated as a filename other
+            wise it will be treated as if it were a file object.
+        split_units: A boolean specifying whether to parse units from values.
+
+    Returns:
+        A dictionary representation of the given isis label.
+    """
+    return parse_label(get_label(stream), split_units=split_units)
