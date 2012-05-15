@@ -20,7 +20,7 @@ Using ISIS 3 at the command line you might want to run the following basic comma
 
 to import the packages, then
 
-`(cub_name, cal_name) = file_variations(img_name, ['.cub', '.cal.cub'])`
+    (cub_name, cal_name) = file_variations(img_name, ['.cub', '.cal.cub'])
 
 to set the desired filename variaitons, and then
 
@@ -37,14 +37,18 @@ In python function form, this short set of commands can be written as:
         isis.mdiscal(from_=cub_name, to=cal_name)
 
 where the function is passed the string image_name and returns nothing.
-   
+
 ### Numerical and String Arguments
 
 Here is an example of the maptemplate and cam2map commands in Pysis:
 
-    isis.maptemplate(map='MDIS_eqr.map', projection='equirectangular', clon=0.0, clat=0.0, resopt='mpp', resolution=1000, rngopt='user', minlat=-10.0, maxlat=10.0, minlon=-10.0, maxlon=10.0)
+    isis.maptemplate(map='MDIS_eqr.map', projection='equirectangular',
+                     clon=0.0, clat=0.0, resopt='mpp', resolution=1000,
+                     rngopt='user', minlat=-10.0, maxlat=10.0, minlon=-10.0,
+                     maxlon=10.0)
 
-    isis.cam2map(from_=cal_name, to=proj_name, pixres='map', map='MDIS_eqr.map', defaultrange='map')
+    isis.cam2map(from_=cal_name, to=proj_name, pixres='map',
+                 map='MDIS_eqr.map',defaultrange='map')
 
 where proj_name is set by:
 

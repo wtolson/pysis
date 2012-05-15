@@ -74,10 +74,12 @@ class Isis(object):
 
     def __init__(self, strict=False):
         self._strict = strict
+        self.__all__ = []
         if strict:
             for name, cmd in self._get_commands():
                 cmd = IsisCommand(cmd)
                 setattr(self, name, cmd)
+                self.__all__.append(name)
 
     def __getattr__(self, name):
         if self._strict:
