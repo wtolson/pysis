@@ -102,6 +102,9 @@ class LabelParser(object):
             if self.cwd.get('__parent__') is None:
                 raise ParseError(self.lineno, 'Unexpected %s' % line)
 
+            if line != 'End_' + self.cwd.get('__type__', ''):
+                raise ParseError(self.lineno, 'Unexpected %s' % line)
+
             parent = self.cwd['__parent__']
             del self.cwd['__parent__']
             self.cwd = parent
@@ -131,17 +134,18 @@ class LabelParser(object):
         value = '='.join(value).strip()
 
         if key == 'Object' or key == 'Group':
+            obj = {'__type__': key, '__parent__': self.cwd}
+
             if value in self.cwd:
                 if not isinstance(self.cwd[value], list):
                     self.cwd[value] = [self.cwd[value]]
 
-                self.cwd[value].append({'__parent__': self.cwd})
-                self.cwd = self.cwd[value][-1]
+                self.cwd[value].append(obj)
 
             else:
-                self.cwd[value] = {'__parent__': self.cwd}
-                self.cwd = self.cwd[value]
+                self.cwd[value] = obj
 
+            self.cwd = obj
             self.current_key = None
 
         else:
@@ -151,7 +155,7 @@ class LabelParser(object):
 
             if units:
                 v, u = units.groups()
-                value = {'value': v, 'units': u}
+                value = {'value': v, 'units': u, '__type__': 'Units'}
 
             if key in self.cwd:
                 if not isinstance(self.cwd[key], list):
