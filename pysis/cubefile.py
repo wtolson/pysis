@@ -19,6 +19,7 @@
 
 import numpy as np
 from .labels import parse_file_label
+from .specialpixels import SPECIAL_PIXELS
 
 class CubeFile(object):
     """ A Isis Cube file reader.
@@ -27,6 +28,8 @@ class CubeFile(object):
         filename: The filename if given, otherwise none.
         label: The parsed label header in dictionary form.
         data: A numpy array representing the image data.
+        multiplier: A multiplicative factor by which to scale pixel DN.
+        base: An additive factor by which to offset pixel DN.
     """
 
     PIXEL_TYPES = {
@@ -45,6 +48,8 @@ class CubeFile(object):
         'Lsb': '<', # little-endian
         'Msb': '>' # big-endian
     }
+
+    SPECIAL_PIXELS = SPECIAL_PIXELS
 
     @staticmethod
     def open(stream, filename=None):
@@ -68,8 +73,8 @@ class CubeFile(object):
         self.filename = filename
         self.label    = parse_file_label(stream)
 
-        (self.bands, self.samples, self.lines)   = self._get_dims()
-        (self.dtype, self.base, self.multiplier) = self._get_pixel_info()
+        (self.bands, self.lines, self.samples)   = self._get_dims()
+        (self.dtype, self.specials, self.base, self.multiplier) = self._get_pixel_info()
 
         start = self._get_data_start()
         stream.seek(start)
@@ -84,58 +89,83 @@ class CubeFile(object):
         else:
             raise Excption('Unkown Isis Cube format (%s)' % self.format)
 
-        # Apply the image scaling
-        if self.multiplier != 1:
-            self.data *= self.multiplier
-
-        if self.base != 0:
-            self.data += self.base
-
         return self
 
     def _get_dims(self):
         dims = self.label['IsisCube']['Core']['Dimensions']
-        return dims['Bands'], dims['Samples'], dims['Lines']
+        return dims['Bands'], dims['Lines'], dims['Samples']
 
     def _get_pixel_info(self):
         pixels_group = self.label['IsisCube']['Core']['Pixels']
 
         byte_order   = self.BYTE_ORDERS[pixels_group['ByteOrder']]
         pixel_type   = self.PIXEL_TYPES[pixels_group['Type']]
+        specials     = self.SPECIAL_PIXELS[pixels_group['Type']]
         dtype        = pixel_type.newbyteorder(byte_order)
 
-        return dtype, pixels_group['Base'], pixels_group['Multiplier']
+        return dtype, specials, pixels_group['Base'], pixels_group['Multiplier']
 
     def _get_data_start(self):
         return self.label['IsisCube']['Core']['StartByte'] - 1
 
     def _read_bs_data(self, stream):
-        size = self.bands * self.samples * self.lines
+        size = self.bands * self.lines * self.samples
         data = np.fromfile(stream, self.dtype, size)
-        return data.reshape((self.bands, self.samples, self.lines))
+        return data.reshape((self.bands, self.lines, self.samples))
 
     def _read_tile_data(self, stream):
-        tile_samples = self.label['IsisCube']['Core']['TileSamples']
         tile_lines   = self.label['IsisCube']['Core']['TileLines']
+        tile_samples = self.label['IsisCube']['Core']['TileSamples']
         tile_size    = tile_samples * tile_lines
+
+        # self.samples, self.lines = self.lines, self.samples
 
         samples = xrange(0, self.samples, tile_samples)
         lines   = xrange(0, self.lines, tile_lines)
 
-        data = np.empty((self.bands, self.samples, self.lines),
+        data = np.empty((self.bands, self.lines, self.samples),
                         dtype=self.dtype)
 
         for band in data:
-            for sample in samples:
-                for line in lines:
+            for line in lines:
+                for sample in samples:
                     sample_end = sample + tile_samples
                     line_end   = line   + tile_lines
-                    chunk      = band[sample:sample_end, line:line_end]
+                    chunk      = band[line:line_end, sample:sample_end]
 
                     tile = np.fromfile(stream, self.dtype, tile_size)
                     tile = tile.reshape((tile_samples, tile_lines))
 
-                    chunk_samples, chunk_lines = chunk.shape
-                    chunk[:] = tile[:chunk_samples, :chunk_lines]
+                    chunk_lines, chunk_samples = chunk.shape
+                    chunk[:] = tile[:chunk_lines, :chunk_samples]
 
         return data
+
+    def apply_scaling(self, copy=True):
+        if copy:
+            return self.multiplier * self.data + self.base
+
+        if self.multiplier != 1:
+            self.data *= self.multiplier
+
+        if self.base != 0:
+            self.data += self.base
+
+        return self.data
+
+    def specials_mask(self):
+        mask  = self.data >= self.specials['Min']
+        mask &= self.data <= self.specials['Max']
+        return mask
+
+    def get_image_array(self):
+        specials_mask = self.specials_mask()
+        data          = self.data.copy()
+
+        data[specials_mask] -= data[specials_mask].min()
+        data[specials_mask] *= 255 / data[specials_mask].max()
+
+        data[data == self.specials['His']] = 255
+        data[data == self.specials['Hrs']] = 255
+
+        return data.astype(np.uint8)
