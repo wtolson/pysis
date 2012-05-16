@@ -69,6 +69,70 @@ class CubeFile(object):
 
         return CubeFile()._open(stream, filename)
 
+    def apply_scaling(self, copy=True):
+        """ Scale pixel values to there true DN.
+
+        Arguments:
+            copy: Whether to apply the scalling to a copy of the pixel data
+                and leave the orginial unaffected.
+
+        Returns:
+            A scalled version of the pixel data.
+        """
+        if copy:
+            return self.multiplier * self.data + self.base
+
+        if self.multiplier != 1:
+            self.data *= self.multiplier
+
+        if self.base != 0:
+            self.data += self.base
+
+        return self.data
+
+    def specials_mask(self):
+        """ Create a pixel map for special pixels.
+
+        Returns:
+            An array where the value is False if the pixel is special and True
+            otherwise.
+        """
+        mask  = self.data >= self.specials['Min']
+        mask &= self.data <= self.specials['Max']
+        return mask
+
+    def get_image_array(self):
+        """ Create an array for use in making an image.
+
+        Creates a linear stretch of the image and scales it to between 0 and
+        255. Null, Lis and Lrs pixels are set to 0. His and Hrs pixels are set
+        to 255.
+
+        Usage:
+            from pysis import CubeFile
+            from PIL import image
+
+            # Read in the image and create the image data
+            im = CubeFile.open('test.cub')
+            data = im.get_image_array()
+
+            # Save the first band to a new file
+            Image.fromarray(data[0]).save('test.png')
+
+        Returns:
+            A uint8 array of pixel values.
+        """
+        specials_mask = self.specials_mask()
+        data          = self.data.copy()
+
+        data[specials_mask] -= data[specials_mask].min()
+        data[specials_mask] *= 255 / data[specials_mask].max()
+
+        data[data == self.specials['His']] = 255
+        data[data == self.specials['Hrs']] = 255
+
+        return data.astype(np.uint8)
+
     def _open(self, stream, filename):
         self.filename = filename
         self.label    = parse_file_label(stream)
@@ -118,8 +182,6 @@ class CubeFile(object):
         tile_samples = self.label['IsisCube']['Core']['TileSamples']
         tile_size    = tile_samples * tile_lines
 
-        # self.samples, self.lines = self.lines, self.samples
-
         samples = xrange(0, self.samples, tile_samples)
         lines   = xrange(0, self.lines, tile_lines)
 
@@ -140,32 +202,3 @@ class CubeFile(object):
                     chunk[:] = tile[:chunk_lines, :chunk_samples]
 
         return data
-
-    def apply_scaling(self, copy=True):
-        if copy:
-            return self.multiplier * self.data + self.base
-
-        if self.multiplier != 1:
-            self.data *= self.multiplier
-
-        if self.base != 0:
-            self.data += self.base
-
-        return self.data
-
-    def specials_mask(self):
-        mask  = self.data >= self.specials['Min']
-        mask &= self.data <= self.specials['Max']
-        return mask
-
-    def get_image_array(self):
-        specials_mask = self.specials_mask()
-        data          = self.data.copy()
-
-        data[specials_mask] -= data[specials_mask].min()
-        data[specials_mask] *= 255 / data[specials_mask].max()
-
-        data[data == self.specials['His']] = 255
-        data[data == self.specials['Hrs']] = 255
-
-        return data.astype(np.uint8)
