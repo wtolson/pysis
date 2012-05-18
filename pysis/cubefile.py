@@ -173,13 +173,11 @@ class CubeFile(object):
 
     @property
     def base(self):
-        pixel_type = self.label['IsisCube']['Core']['Pixels']['Base']
-        return self.SPECIAL_PIXELS[pixel_type]
+        return self.label['IsisCube']['Core']['Pixels']['Base']
 
     @property
     def multiplier(self):
-        pixel_type = self.label['IsisCube']['Core']['Pixels']['Multiplier']
-        return self.SPECIAL_PIXELS[pixel_type]
+        return self.label['IsisCube']['Core']['Pixels']['Multiplier']
 
     @property
     def start_byte(self):
