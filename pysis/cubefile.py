@@ -63,11 +63,7 @@ class CubeFile(object):
         Returns:
             A new isis cube object from the specified file.
         """
-        if isinstance(stream, basestring):
-            with open(stream) as f:
-                return CubeFile()._open(f, stream)
-
-        return CubeFile()._open(stream, filename)
+        return CubeFile(stream, filename)
 
     def apply_scaling(self, copy=True):
         """ Scale pixel values to there true DN.
@@ -133,60 +129,114 @@ class CubeFile(object):
 
         return data.astype(np.uint8)
 
-    def _open(self, stream, filename):
-        self.filename = filename
-        self.label    = parse_file_label(stream)
+    @property
+    def bands(self):
+        return self.label['IsisCube']['Core']['Dimensions']['Bands']
 
-        (self.bands, self.lines, self.samples)   = self._get_dims()
-        (self.dtype, self.specials, self.base, self.multiplier) = self._get_pixel_info()
+    @property
+    def lines(self):
+        return self.label['IsisCube']['Core']['Dimensions']['Lines']
 
-        start = self._get_data_start()
-        stream.seek(start)
+    @property
+    def samples(self):
+        return self.label['IsisCube']['Core']['Dimensions']['Samples']
 
-        self.format = self.label['IsisCube']['Core']['Format']
-        if self.format == 'BandSequential':
-            self.data = self._read_bs_data(stream)
+    @property
+    def tile_lines(self):
+        if self.format != 'Tile':
+            return None
 
-        elif self.format == 'Tile':
-            self.data = self._read_tile_data(stream)
+        return self.label['IsisCube']['Core']['TileLines']
 
-        else:
-            raise Excption('Unkown Isis Cube format (%s)' % self.format)
+    @property
+    def tile_samples(self):
+        if self.format != 'Tile':
+            return None
 
-        return self
+        return self.label['IsisCube']['Core']['TileSamples']
 
-    def _get_dims(self):
-        dims = self.label['IsisCube']['Core']['Dimensions']
-        return dims['Bands'], dims['Lines'], dims['Samples']
+    @property
+    def format(self):
+        return self.label['IsisCube']['Core']['Format']
 
-    def _get_pixel_info(self):
+    @property
+    def dtype(self):
         pixels_group = self.label['IsisCube']['Core']['Pixels']
-
         byte_order   = self.BYTE_ORDERS[pixels_group['ByteOrder']]
         pixel_type   = self.PIXEL_TYPES[pixels_group['Type']]
-        specials     = self.SPECIAL_PIXELS[pixels_group['Type']]
-        dtype        = pixel_type.newbyteorder(byte_order)
+        return pixel_type.newbyteorder(byte_order)
 
-        return dtype, specials, pixels_group['Base'], pixels_group['Multiplier']
+    @property
+    def specials(self):
+        pixel_type = self.label['IsisCube']['Core']['Pixels']['Type']
+        return self.SPECIAL_PIXELS[pixel_type]
 
-    def _get_data_start(self):
+    @property
+    def base(self):
+        pixel_type = self.label['IsisCube']['Core']['Pixels']['Base']
+        return self.SPECIAL_PIXELS[pixel_type]
+
+    @property
+    def multiplier(self):
+        pixel_type = self.label['IsisCube']['Core']['Pixels']['Multiplier']
+        return self.SPECIAL_PIXELS[pixel_type]
+
+    @property
+    def start_byte(self):
         return self.label['IsisCube']['Core']['StartByte'] - 1
 
-    def _read_bs_data(self, stream):
-        size = self.bands * self.lines * self.samples
-        data = np.fromfile(stream, self.dtype, size)
-        return data.reshape((self.bands, self.lines, self.samples))
+    @property
+    def shape(self):
+        return (self.bands, self.lines, self.samples)
 
-    def _read_tile_data(self, stream):
-        tile_lines   = self.label['IsisCube']['Core']['TileLines']
-        tile_samples = self.label['IsisCube']['Core']['TileSamples']
-        tile_size    = tile_samples * tile_lines
+    @property
+    def size(self):
+        return self.bands * self.lines * self.samples
 
-        samples = xrange(0, self.samples, tile_samples)
-        lines   = xrange(0, self.lines, tile_lines)
+    def __init__(self, stream, filename=None):
+        """ Create an Isis Cube file.
 
-        data = np.empty((self.bands, self.lines, self.samples),
-                        dtype=self.dtype)
+        Arguments:
+            stream: The file name or file object to read as an isis file.
+            filename: If stream is a file object, an optional filename to attach
+                to the object.
+        """
+        if isinstance(stream, basestring):
+            self.filename = stream
+            with open(self.filename) as f:
+                self._open(f)
+
+        else:
+            self.filename = filename
+            self._open(stream)
+
+    def _open(self, stream):
+        self.label = parse_file_label(stream)
+        stream.seek(self.start_byte)
+
+        if self.format == 'BandSequential':
+            self.data = self._get_bs_data(stream)
+
+        elif self.format == 'Tile':
+            self.data = self._get_tile_data(stream)
+
+        else:
+            raise Exception('Unkown Isis Cube format (%s)' % self.format)
+
+    def _get_bs_data(self, stream):
+        data = np.fromfile(stream, self.dtype, self.size)
+        return data.reshape(self.shape)
+
+    def _get_tile_data(self, stream):
+        tile_lines   = self.tile_lines
+        tile_samples = self.tile_samples
+        tile_size    = tile_lines * tile_samples
+
+        lines     = xrange(0, self.lines, self.tile_lines)
+        samples   = xrange(0, self.samples, self.tile_samples)
+
+        dtype = self.dtype
+        data  = np.empty(self.shape, dtype=dtype)
 
         for band in data:
             for line in lines:
@@ -195,7 +245,7 @@ class CubeFile(object):
                     line_end   = line   + tile_lines
                     chunk      = band[line:line_end, sample:sample_end]
 
-                    tile = np.fromfile(stream, self.dtype, tile_size)
+                    tile = np.fromfile(stream, dtype, tile_size)
                     tile = tile.reshape((tile_samples, tile_lines))
 
                     chunk_lines, chunk_samples = chunk.shape
