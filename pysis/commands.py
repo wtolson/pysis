@@ -22,15 +22,12 @@ A pythonic syntax for calling Isis commands.
 """
 import os
 from os import path
-from multiprocessing import Pool
 from subprocess import call, check_output
 from .setup import ISIS_ROOT
 
 __all__ = [
     'Isis',
-    'IsisCommand',
-    'IsisPool',
-    'QueuedIsisCommand'
+    'IsisCommand'
 ]
 
 class IsisCommand(object):
@@ -64,13 +61,24 @@ class IsisCommand(object):
 
 
 class Isis(object):
-    @staticmethod
-    def _get_commands():
-        bin_dir = path.join(ISIS_ROOT, 'bin')
-        for name in os.listdir(bin_dir):
-            cmd = path.join(bin_dir, name)
-            if path.isfile(cmd) and os.access(cmd, os.X_OK):
-                yield name, cmd
+    __commands = None
+
+    @classmethod
+    def _get_commands(cls):
+        if cls.commands is None:
+            cls.__commands = []
+
+            # Look for commands in $ISISROOT/bin
+            bin_dir = path.join(ISIS_ROOT, 'bin')
+            for name in os.listdir(bin_dir):
+                cmd = path.join(bin_dir, name)
+
+                # Check that each file is executable and not a directory
+                if path.isfile(cmd) and os.access(cmd, os.X_OK):
+                    cls.__commands.append((name, cmd))
+
+        # Return cached commands
+        return cls.__commands
 
     def __init__(self, strict=False):
         self._strict = strict
@@ -86,43 +94,3 @@ class Isis(object):
             raise AttributeError("No isis command for '%s'" % name)
 
         return IsisCommand(name)
-
-
-class QueuedIsisCommand(IsisCommand):
-    def __init__(self, name, queue):
-        self.queue = queue
-        super(QueuedIsisCommand, self).__init__(name)
-
-    def __call__(self, **kwargs):
-        return self.queue.apply_async(check_output, [self.get_cmd(**kwargs)])
-
-
-class IsisPool(Isis):
-    def __init__(self, strict=False, *args, **kwargs):
-        self.pool = Pool(*args, **kwargs)
-
-        self._strict = strict
-        if strict:
-            for name, cmd in self._get_commands():
-                cmd = QueuedIsisCommand(cmd)
-                setattr(self, name, cmd)
-
-    def __getattr__(self, name):
-        if hasattr(self.pool, name):
-            return getattr(self.pool, name)
-
-        if self._strict:
-            raise AttributeError("No isis command for '%s'" % name)
-
-        return QueuedIsisCommand(name, self)
-
-    def close_and_wait(self):
-        self.close()
-        self.join()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.close_and_wait()
-

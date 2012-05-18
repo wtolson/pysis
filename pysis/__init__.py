@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
-from .setup import *
-import isis
-from cubefile import CubeFile
+from .setup    import *
+from .         import isis
+
+from .commands import Isis
+from .isispool import IsisPool
+
+from .cubefile import CubeFile
