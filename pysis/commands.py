@@ -65,7 +65,7 @@ class Isis(object):
 
     @classmethod
     def _get_commands(cls):
-        if cls.commands is None:
+        if cls.__commands is None:
             cls.__commands = []
 
             # Look for commands in $ISISROOT/bin
