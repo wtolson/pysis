@@ -54,8 +54,8 @@ if ISIS_VERSION_MAJOR == 3:
     #Check for the ISIS3TESTDATA directory. If it does not exist use a default
     ISIS_TEST_DATA = path.normpath(path.join(ISIS_ROOT, '../testData'))
     if not path.exists(ISIS_TEST_DATA):
-        ISIS_DATA = '/usgs/cpkgs/isis3/testData'
-    os.environ['ISIS3DATA'] = ISIS_DATA
+        ISIS_TEST_DATA = '/usgs/cpkgs/isis3/testData'
+    os.environ['ISIS3TESTDATA'] = ISIS_TEST_DATA
 
     #If PATH is not set, just set it to a default location. Else preappend
     #the isis path to the end of the current path
