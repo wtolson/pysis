@@ -58,3 +58,19 @@ def file_variations(filename, extensions):
     """
     (label, ext) = splitext(filename)
     return [label + extention for extention in extensions]
+
+class ImageName(object):
+    def __init__(self, base):
+        self._base = base
+
+    def __getattr__(self, name):
+        return ImageName(self._base + '.' + name)
+
+    def __str__(self):
+        return str(self._base)
+
+    def __unicode__(self):
+        return unicode(self._base)
+
+    def __repr__(self):
+        return '%s(%r)' % (self.__class__.__name__, self._base)
