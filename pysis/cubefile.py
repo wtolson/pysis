@@ -86,6 +86,42 @@ class CubeFile(object):
 
         return self.data
 
+    def apply_numpy_specials(self, copy=True):
+        """ Convert isis special pixel values to numpy special pixel values.
+
+                 Isis -> Numpy
+                ===============
+                 Null ->   nan
+                ---------------
+                 Lrs  ->  -inf
+                 Lis  ->  -inf
+                ---------------
+                 His  ->   inf
+                 Hrs  ->   inf
+
+        Arguments:
+            copy: Whether to apply the new special values to a copy of the pixel
+                data and leave the orginial unaffected.
+
+        Returns:
+            A numpy array with special values converted to numpy's nan, inf and
+            -inf.
+        """
+        if copy:
+            data = self.data.astype(np.float64)
+
+        elif self.data.dtype != np.float64:
+            data = self.data = self.data.astype(np.float64)
+
+        else:
+            data = self.data
+
+        data[data == self.specials['Null']] = np.nan
+        data[data < self.specials['Min']]   = np.NINF
+        data[data > self.specials['Max']]   = np.inf
+
+        return data
+
     def specials_mask(self):
         """ Create a pixel map for special pixels.
 
@@ -106,7 +142,7 @@ class CubeFile(object):
 
         Usage:
             from pysis import CubeFile
-            from PIL import image
+            from PIL import Image
 
             # Read in the image and create the image data
             im = CubeFile.open('test.cub')
@@ -244,7 +280,7 @@ class CubeFile(object):
                     chunk      = band[line:line_end, sample:sample_end]
 
                     tile = np.fromfile(stream, dtype, tile_size)
-                    tile = tile.reshape((tile_samples, tile_lines))
+                    tile = tile.reshape((tile_lines, tile_samples))
 
                     chunk_lines, chunk_samples = chunk.shape
                     chunk[:] = tile[:chunk_lines, :chunk_samples]
