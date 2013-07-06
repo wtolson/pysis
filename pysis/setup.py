@@ -39,7 +39,8 @@ try:
         ISIS_VERSION_PATCH, ISIS_VERSION_BUILD) = map(int, ISIS_VERSION.split('.'))
 
 except:
-    sys.stderr.write('Warning! Could not find isis. Is `ISISROOT` set?\n')
+    import warnings
+    warnings.warn('Could not find isis. Is `ISISROOT` set?', RuntimeWarning)
 
     (ISIS_VERSION, ISIS_VERSION_MAJOR, ISIS_VERSION_MINOR,
         ISIS_VERSION_PATCH, ISIS_VERSION_BUILD) = 5 * (None,)
