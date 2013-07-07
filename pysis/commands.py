@@ -61,33 +61,29 @@ class IsisCommand(object):
 
 
 class Isis(object):
-    __commands = None
-
-    @classmethod
-    def _get_commands(cls):
-        if cls.__commands is None:
-            cls.__commands = []
-
-            # Look for commands in $ISISROOT/bin
-            bin_dir = path.join(ISIS_ROOT, 'bin')
-            for name in os.listdir(bin_dir):
-                cmd = path.join(bin_dir, name)
-
-                # Check that each file is executable and not a directory
-                if path.isfile(cmd) and os.access(cmd, os.X_OK):
-                    cls.__commands.append((name, cmd))
-
-        # Return cached commands
-        return cls.__commands
-
-    def __init__(self, strict=False):
+    def __init__(self, strict=False, root=ISIS_ROOT):
         self._strict = strict
+        self._root   = root
         self.__all__ = []
+
         if strict:
-            for name, cmd in self._get_commands():
-                cmd = IsisCommand(cmd)
-                setattr(self, name, cmd)
-                self.__all__.append(name)
+            self._setup_commands()
+
+    def _setup_commands(self):
+        for name, cmd in self._get_commands():
+            cmd = IsisCommand(cmd)
+            setattr(self, name, cmd)
+            self.__all__.append(name)
+
+    def _get_commands(self):
+        # Look for commands in $ISISROOT/bin
+        bin_dir = path.join(self._root, 'bin')
+        for name in os.listdir(bin_dir):
+            cmd = path.join(bin_dir, name)
+
+            # Check that each file is executable and not a directory
+            if path.isfile(cmd) and os.access(cmd, os.X_OK):
+                yield name, cmd
 
     def __getattr__(self, name):
         if self._strict:

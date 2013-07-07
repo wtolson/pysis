@@ -21,7 +21,4 @@ import sys
 from .setup import ISIS_VERSION
 from .commands import Isis
 
-if ISIS_VERSION is None:
-    sys.modules[__name__] = Isis()
-else:
-    sys.modules[__name__] = Isis(strict=True)
+sys.modules[__name__] = Isis(strict=(ISIS_VERSION is not None))
