@@ -19,6 +19,7 @@
 
 import os, sys
 from os import path
+from .exceptions import VersionError
 
 __all__ = [
     'ISIS_ROOT',
@@ -72,7 +73,7 @@ if ISIS_VERSION_MAJOR == 3:
 
 def require_isis_version(major, minor=None, patch=None, build=None):
     err_msg = 'Version %s.%s.%s.%s of isis required (%s found).'
-    err = Exception(err_msg % (major, minor, patch, build, ISIS_VERSION))
+    err = VersionError(err_msg % (major, minor, patch, build, ISIS_VERSION))
 
     if major != ISIS_VERSION_MAJOR:
         raise err
