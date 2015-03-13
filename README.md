@@ -51,6 +51,16 @@ Here is an example of the maptemplate and cam2map commands in Pysis:
     isis.cam2map(from_=cal_name, to=proj_name, pixres='map',
                  map='MDIS_eqr.map',defaultrange='map')
 
+### Getting values from ISIS commands
+
+Here is an example of how to receive values that are returned on STDOUT from ISIS tools.
+The example command we are using is `getkey` to receive values from the label of an
+ISIS cube:
+
+    value = getkey.check_output(from_='W1467351325_4.map.cal.cub',
+                                keyword='minimumringradius',
+                                grp='mapping')
+
 ### Multiprocessing Isis Commands with IsisPool
 
 Pysis has built-in support to make multiprocessing isis commands simple. To run
