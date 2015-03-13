@@ -29,6 +29,7 @@ __all__ = [
     'file_variations'
 ]
 
+
 def write_file_list(filename, file_list=[], glob=None):
     """ Write a list of files to a file.
 
@@ -54,10 +55,11 @@ def file_variations(filename, extensions):
 
     Arguments:
         filename: The original file name to use as a base.
-        extensions: A list of file extensions to to generate new filenames.
+        extensions: A list of file extensions to generate new filenames.
     """
     (label, ext) = splitext(filename)
     return [label + extention for extention in extensions]
+
 
 class ImageName(object):
     def __init__(self, base):
