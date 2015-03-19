@@ -26,7 +26,7 @@ Usage:
         spiceinit from=filename.cub
         mdiscal from=filename.cub to=filename.cal.cub
 
-    from pysis import PysisPool
+    from pysis import IsisPool
     from pysis.util import file_variations
 
     def calibrate_mdis(images):
