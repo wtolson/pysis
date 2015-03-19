@@ -67,7 +67,7 @@ Pysis has built-in support to make multiprocessing isis commands simple. To run
 the above MDIS calibration script for multiple images in multiple processes we
 could rewrite the function as so:
 
-    from pysis import PysisPool
+    from pysis import IsisPool
     from pysis.util import file_variations
 
     def calibrate_mdis(images):
