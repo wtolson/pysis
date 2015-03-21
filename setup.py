@@ -1,22 +1,48 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
+
+readme = open('README.rst').read()
+history = open('HISTORY.rst').read().replace('.. :changelog:', '')
+
 
 setup(
-    name='Pysis',
-    version='0.3.1',
-    author='William Trevor Olson',
-    author_email='wtolson@gmail.com',
+    name='pysis',
+    version='0.4.0',
+    description='Toolkit for using USGS Isis in Python.',
+    long_description=readme + '\n\n' + history,
+    author='Trevor Olson',
+    author_email='trevor@heytrevor.com',
+    url='https://github.com/wtolson/pysis',
     packages=[
         'pysis',
         'pysis.binning',
-        'pysis.util'
+        'pysis.util',
     ],
-    scripts=[],
-    url='https://github.com/wtolson/Pysis',
-    license='LICENSE.txt',
-    description='Useful toolkit for working with Isis in Python.',
-    long_description=open('README.md').read(),
-    install_requires=[]
+    package_dir={'pysis':
+                 'pysis'},
+    include_package_data=True,
+    install_requires=[
+        'numpy',
+    ],
+    license='GPLv3',
+    zip_safe=False,
+    keywords='pysis',
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Natural Language :: English',
+        "Programming Language :: Python :: 2",
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+    ]
 )

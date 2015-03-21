@@ -1,18 +1,48 @@
-# Pysis
-A robust toolkit for using [USGS ISIS 3][isis] in Python.
+===============================
+Pysis
+===============================
 
-## How to install
-First you must have [USGS ISIS 3][isis] installed on your machine. See the ISIS
-3 [installation guide][install] for further instructions. Remember to set your
-environmental variables (see step 4 of USGS ISIS guide) so Pysis knows where
-your installation is.
+.. image:: https://badge.fury.io/py/pysis.svg
+    :target: http://badge.fury.io/py/pysis
 
-To then install Pysis first [download][download] and extract Pysis. Then install
-the packages with:
+.. image:: https://travis-ci.org/wtolson/pysis.svg?branch=master
+        :target: https://travis-ci.org/wtolson/pysis
 
-    python setup.py install
+.. image:: https://pypip.in/d/pysis/badge.png
+        :target: https://pypi.python.org/pypi/pysis
 
-## Quickstart Guide
+
+Toolkit for using USGS Isis in Python.
+
+* Free software: GPLv3 license
+* Documentation: http://pysis.readthedocs.org.
+
+
+How to install
+--------------
+
+At the command line::
+
+    $ easy_install pysis
+
+Or, if you have virtualenvwrapper installed::
+
+    $ mkvirtualenv pysis
+    $ pip install pysis
+
+
+Dependencies
+~~~~~~~~~~~~
+
+For working with ISIS commands, you must firts have `USGS ISIS 3`_ installed on
+your machine. See the ISIS 3 `installation guide`_ for further instructions.
+Remember to set your environmental variables (see step 4 of USGS ISIS guide) so
+Pysis knows where your installation is.
+
+
+Quickstart Guide
+----------------
+
 How to write ISIS 3 code in python using Pysis.
 
 Using ISIS 3 at the command line you might want to run the following basic
@@ -22,7 +52,7 @@ commands (examples for the MDIS camera on the MESSENGER mission):
     spiceinit from=filename.cub
     mdiscal from=filename.cub to=filename.cal.cub
 
-using Pysis the syntax is:
+using Pysis the syntax is::
 
     from pysis.isis import mdis2isis, spiceinit, mdiscal
     from pysis.util import file_variations
@@ -37,9 +67,11 @@ using Pysis the syntax is:
 You will notice that we use the keyword `from_` when we call a command  because
 `from` is a reserved word in python.
 
-### Numerical and String Arguments
 
-Here is an example of the maptemplate and cam2map commands in Pysis:
+Numerical and String Arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here is an example of the maptemplate and cam2map commands in Pysis::
 
     from pysis import isis
 
@@ -51,21 +83,25 @@ Here is an example of the maptemplate and cam2map commands in Pysis:
     isis.cam2map(from_=cal_name, to=proj_name, pixres='map',
                  map='MDIS_eqr.map',defaultrange='map')
 
-### Getting values from ISIS commands
 
-Here is an example of how to receive values that are returned on STDOUT from ISIS tools.
-The example command we are using is `getkey` to receive values from the label of an
-ISIS cube:
+Getting values from ISIS commands
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Here is an example of how to receive values that are returned on STDOUT from
+ISIS tools. The example command we are using is `getkey` to receive values from
+the label of an ISIS cube::
 
     value = getkey.check_output(from_='W1467351325_4.map.cal.cub',
                                 keyword='minimumringradius',
                                 grp='mapping')
 
-### Multiprocessing Isis Commands with IsisPool
+
+Multiprocessing Isis Commands with IsisPool
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Pysis has built-in support to make multiprocessing isis commands simple. To run
 the above MDIS calibration script for multiple images in multiple processes we
-could rewrite the function as so:
+could rewrite the function as so::
 
     from pysis import IsisPool
     from pysis.util import file_variations
@@ -90,6 +126,6 @@ When using IsisPool we can't determine which order commands will be executed in
 so we much run each command for all the files as a group before moving to the
 next command and creating a new IsisPool.
 
-[isis]: http://isis.astrogeology.usgs.gov/  "USGS ISIS 3"
-[install]: http://isis.astrogeology.usgs.gov/documents/InstallGuide/
-[download]: https://github.com/wtolson/Pysis/tarball/master
+
+.. _USGS ISIS 3: http://isis.astrogeology.usgs.gov/
+.. _installation guide: http://isis.astrogeology.usgs.gov/documents/InstallGuide/
