@@ -24,11 +24,6 @@ Utilities to help with file manipulation.
 from glob import iglob
 from os.path import splitext
 
-__all__ = [
-    'write_file_list',
-    'file_variations'
-]
-
 
 def write_file_list(filename, file_list=[], glob=None):
     """ Write a list of files to a file.

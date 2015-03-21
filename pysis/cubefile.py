@@ -17,9 +17,10 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import numpy as np
+import numpy
 from .labels import parse_file_label
 from .specialpixels import SPECIAL_PIXELS
+
 
 class CubeFile(object):
     """ A Isis Cube file reader.
@@ -33,20 +34,20 @@ class CubeFile(object):
     """
 
     PIXEL_TYPES = {
-        'UnsignedByte': np.dtype('uint8'),
-        'SignedByte': np.dtype('int8'),
-        'UnsignedWord': np.dtype('uint16'),
-        'SignedWord': np.dtype('int16'),
-        'UnsignedInteger': np.dtype('uint32'),
-        'SignedInteger': np.dtype('int32'),
-        'Real': np.dtype('float32'),
-        'Double': np.dtype('float64')
+        'UnsignedByte': numpy.dtype('uint8'),
+        'SignedByte': numpy.dtype('int8'),
+        'UnsignedWord': numpy.dtype('uint16'),
+        'SignedWord': numpy.dtype('int16'),
+        'UnsignedInteger': numpy.dtype('uint32'),
+        'SignedInteger': numpy.dtype('int32'),
+        'Real': numpy.dtype('float32'),
+        'Double': numpy.dtype('float64')
     }
 
     BYTE_ORDERS = {
-        'NoByteOrder': '=',
-        'Lsb': '<', # little-endian
-        'Msb': '>' # big-endian
+        'NoByteOrder': '=',  # system
+        'Lsb': '<',          # little-endian
+        'Msb': '>'           # big-endian
     }
 
     SPECIAL_PIXELS = SPECIAL_PIXELS
@@ -108,17 +109,17 @@ class CubeFile(object):
             -inf.
         """
         if copy:
-            data = self.data.astype(np.float64)
+            data = self.data.astype(numpy.float64)
 
-        elif self.data.dtype != np.float64:
-            data = self.data = self.data.astype(np.float64)
+        elif self.data.dtype != numpy.float64:
+            data = self.data = self.data.astype(numpy.float64)
 
         else:
             data = self.data
 
-        data[data == self.specials['Null']] = np.nan
-        data[data < self.specials['Min']]   = np.NINF
-        data[data > self.specials['Max']]   = np.inf
+        data[data == self.specials['Null']] = numpy.nan
+        data[data < self.specials['Min']] = numpy.NINF
+        data[data > self.specials['Max']] = numpy.inf
 
         return data
 
@@ -129,7 +130,7 @@ class CubeFile(object):
             An array where the value is False if the pixel is special and True
             otherwise.
         """
-        mask  = self.data >= self.specials['Min']
+        mask = self.data >= self.specials['Min']
         mask &= self.data <= self.specials['Max']
         return mask
 
@@ -155,7 +156,7 @@ class CubeFile(object):
             A uint8 array of pixel values.
         """
         specials_mask = self.specials_mask()
-        data          = self.data.copy()
+        data = self.data.copy()
 
         data[specials_mask] -= data[specials_mask].min()
         data[specials_mask] *= 255 / data[specials_mask].max()
@@ -163,7 +164,7 @@ class CubeFile(object):
         data[data == self.specials['His']] = 255
         data[data == self.specials['Hrs']] = 255
 
-        return data.astype(np.uint8)
+        return data.astype(numpy.uint8)
 
     @property
     def bands(self):
@@ -198,8 +199,8 @@ class CubeFile(object):
     @property
     def dtype(self):
         pixels_group = self.label['IsisCube']['Core']['Pixels']
-        byte_order   = self.BYTE_ORDERS[pixels_group['ByteOrder']]
-        pixel_type   = self.PIXEL_TYPES[pixels_group['Type']]
+        byte_order = self.BYTE_ORDERS[pixels_group['ByteOrder']]
+        pixel_type = self.PIXEL_TYPES[pixels_group['Type']]
         return pixel_type.newbyteorder(byte_order)
 
     @property
@@ -258,28 +259,28 @@ class CubeFile(object):
             raise Exception('Unkown Isis Cube format (%s)' % self.format)
 
     def _get_bs_data(self, stream):
-        data = np.fromfile(stream, self.dtype, self.size)
+        data = numpy.fromfile(stream, self.dtype, self.size)
         return data.reshape(self.shape)
 
     def _get_tile_data(self, stream):
-        tile_lines   = self.tile_lines
+        tile_lines = self.tile_lines
         tile_samples = self.tile_samples
-        tile_size    = tile_lines * tile_samples
+        tile_size = tile_lines * tile_samples
 
-        lines     = xrange(0, self.lines, self.tile_lines)
-        samples   = xrange(0, self.samples, self.tile_samples)
+        lines = xrange(0, self.lines, self.tile_lines)
+        samples = xrange(0, self.samples, self.tile_samples)
 
         dtype = self.dtype
-        data  = np.empty(self.shape, dtype=dtype)
+        data = numpy.empty(self.shape, dtype=dtype)
 
         for band in data:
             for line in lines:
                 for sample in samples:
                     sample_end = sample + tile_samples
-                    line_end   = line   + tile_lines
-                    chunk      = band[line:line_end, sample:sample_end]
+                    line_end = line + tile_lines
+                    chunk = band[line:line_end, sample:sample_end]
 
-                    tile = np.fromfile(stream, dtype, tile_size)
+                    tile = numpy.fromfile(stream, dtype, tile_size)
                     tile = tile.reshape((tile_lines, tile_samples))
 
                     chunk_lines, chunk_samples = chunk.shape

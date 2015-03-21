@@ -19,7 +19,7 @@
 
 
 from math import log, ceil
-from AbstractBinnedKeys import AbstractBinnedKeys
+from .abstract import AbstractBinnedKeys
 
 
 class GeometricBinnedKeys(AbstractBinnedKeys):
@@ -38,12 +38,11 @@ class GeometricBinnedKeys(AbstractBinnedKeys):
 
         self.min_value = float(min_value)
 
-        self.num_bins = ceil(GeometricBinnedKeys.C * log(max_value / self.min_value))
+        self.num_bins = ceil(self.C * log(max_value / self.min_value))
         self.max_value = pow(2.0, self.num_bins / 2.0) * self.min_value
         self.num_bins = int(self.num_bins)
 
         self.bins = [[] for _ in xrange(self.num_bins)]
-
 
     def get_bin_index(self, value):
         """
@@ -51,9 +50,8 @@ class GeometricBinnedKeys(AbstractBinnedKeys):
         """
         if value == self.max_value:
             return self.num_bins - 1
-        
-        return int(GeometricBinnedKeys.C * log(value / self.min_value))
 
+        return int(self.C * log(value / self.min_value))
 
     def get_bounds(self, bin_num):
         """
@@ -63,4 +61,4 @@ class GeometricBinnedKeys(AbstractBinnedKeys):
         min_value = pow(2.0, float(bin_num) / 2.0) * self.min_value
         max_value = pow(2.0, float(bin_num + 1.0) / 2.0) * self.min_value
 
-        return GeometricBinnedKeys.Bounds(min_value, max_value)
+        return self.Bounds(min_value, max_value)

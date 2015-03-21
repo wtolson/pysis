@@ -19,7 +19,8 @@
 
 
 from math import ceil
-from AbstractBinnedKeys import AbstractBinnedKeys
+from .abstract import AbstractBinnedKeys
+
 
 class ConstWidthBinnedKeys(AbstractBinnedKeys):
     """
@@ -43,7 +44,6 @@ class ConstWidthBinnedKeys(AbstractBinnedKeys):
         self.bin_size = (self.max_value - self.min_value) / self.num_bins
         self.bins = [[] for _ in xrange(self.num_bins)]
 
-
     def get_bin_index(self, value):
         """
         Used to get the index of the bin to place a particular value.
@@ -53,7 +53,6 @@ class ConstWidthBinnedKeys(AbstractBinnedKeys):
 
         return int((value - self.min_value) / self.bin_size)
 
-
     def get_bounds(self, bin_num):
         """
         Get the bonds of a bin, given its index `bin_num`. A `Bounds` namedtuple
@@ -62,4 +61,4 @@ class ConstWidthBinnedKeys(AbstractBinnedKeys):
         min_bound = (self.bin_size * bin_num) + self.min_value
         max_bound = min_bound + self.bin_size
 
-        return BinnedKeys.Bounds(min_bound, max_bound)
+        return self.Bounds(min_bound, max_bound)

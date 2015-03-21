@@ -30,6 +30,7 @@ __all__ = [
     'IsisCommand'
 ]
 
+
 class IsisCommand(object):
     def __init__(self, name):
         self.name = name
@@ -63,7 +64,7 @@ class IsisCommand(object):
 class Isis(object):
     def __init__(self, strict=False, root=ISIS_ROOT):
         self._strict = strict
-        self._root   = root
+        self._root = root
         self.__all__ = []
 
         if strict:

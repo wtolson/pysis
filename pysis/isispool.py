@@ -20,7 +20,8 @@
 """ Simple multiprocessing for Isis commands.
 
 Usage:
-    Example for running the following isis script in parallel for a list of images.
+    Example for running the following isis script in parallel for a list of
+    images.
 
         mdis2isis from=filename.IMG to=filename.cub
         spiceinit from=filename.cub
@@ -56,6 +57,7 @@ __all__ = [
     'IsisPool',
     'QueuedIsisCommand'
 ]
+
 
 class QueuedIsisCommand(IsisCommand):
     def __init__(self, name, queue):
@@ -94,4 +96,3 @@ class IsisPool(Isis):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close_and_wait()
-

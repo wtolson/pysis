@@ -20,4 +20,10 @@
 Utilities to help with common Isis patterns.
 """
 
-from file_manipulation import *
+__all__ = [
+    'write_file_list',
+    'file_variations'
+]
+
+
+from file_manipulation import write_file_list, file_variations

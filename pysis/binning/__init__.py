@@ -20,6 +20,12 @@
 Utilities to help with various binning methods.
 """
 
-from ConstWidthBinnedKeys import ConstWidthBinnedKeys
-from BoundedBinnedKeys import BoundedBinnedKeys
-from GeometricBinnedKeys import GeometricBinnedKeys
+__all__ = [
+    'ConstWidthBinnedKeys',
+    'BoundedBinnedKeys',
+    'GeometricBinnedKeys',
+]
+
+from .const_width import ConstWidthBinnedKeys
+from .bounded import BoundedBinnedKeys
+from .geometric import GeometricBinnedKeys

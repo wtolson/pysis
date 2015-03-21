@@ -21,7 +21,10 @@
 Various Python Utilities for working with Isis labels.
 """
 
+import io
 import re
+import logging
+
 
 __all__ = [
     'ParseError',
@@ -30,6 +33,10 @@ __all__ = [
     'parse_label',
     'parse_file_label'
 ]
+
+
+logger = logging.getLogger(__name__)
+
 
 class EndFound(Exception):
     pass
@@ -52,15 +59,9 @@ class LabelParser(object):
     valid_int = re.compile(r'^[-+]?[0-9]+$')
     valid_float = re.compile(r'^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$')
 
-    def __init__(self, split_units=True, DEBUG=False):
+    def __init__(self, split_units=True):
         self.split_units = split_units
-        self.DEBUG = DEBUG
-
         self.current_key = None
-
-    def debug(self, msg):
-        if self.DEBUG:
-            print msg
 
     def parse(self, label):
         self.cwd = output = {}
@@ -71,18 +72,16 @@ class LabelParser(object):
         try:
             for lineno, line in enumerate(label.splitlines(), 1):
                 self.lineno = lineno
-                self.debug('%s: %s' % (lineno, line))
+                logger.debug('%s: %s' % (lineno, line))
                 self.parse_line(line)
 
         except EndFound:
-            end_found = True
             pass
 
         else:
             raise ParseError(lineno, 'Unexpected end of label')
 
         return self.format_output(output)
-
 
     def parse_line(self, line):
         line = line.strip()
@@ -95,7 +94,6 @@ class LabelParser(object):
 
         else:
             self.parse_parts(*parts)
-
 
     def parse_end_group(self, line):
         if line == 'End_Group' or line == 'End_Object':
@@ -114,7 +112,7 @@ class LabelParser(object):
             if self.cwd.get('__parent__') is not None:
                 raise ParseError(self.lineno, 'Unexpected End')
 
-            self.debug('End Found')
+            logger.debug('End Found')
             raise EndFound
 
         else:
@@ -127,7 +125,6 @@ class LabelParser(object):
 
             else:
                 self.cwd[self.current_key] += '\n' + line
-
 
     def parse_parts(self, key, *value):
         key = key.strip()
@@ -168,13 +165,11 @@ class LabelParser(object):
 
             self.current_key = key
 
-
     def format_output(self, cwd):
         for key, value in cwd.iteritems():
             cwd[key] = self.format_value(value)
 
         return cwd
-
 
     def format_value(self, value):
         if isinstance(value, dict):
@@ -185,7 +180,6 @@ class LabelParser(object):
 
         else:
             return self.cast_value(value)
-
 
     def cast_value(self, value):
         value = self.continuation.sub('', value)
@@ -207,13 +201,13 @@ class LabelParser(object):
             return value
 
 
-def get_label(stream, BUF_SIZE=65537):
+def get_label(stream, buffer_size=io.DEFAULT_BUFFER_SIZE):
     """Extract the label string from an isis file.
 
     Arguments:
         stream: If stream is a string it will be treated as a filename other
             wise it will be treated as if it were a file object.
-        BUF_SIZE: The chunksize to read the label in by.
+        buffer_size: The chunksize to read the label in by.
 
     Returns:
         The label of the isis file as a string.
@@ -223,7 +217,7 @@ def get_label(stream, BUF_SIZE=65537):
             return get_label(f)
 
     label = []
-    buff = stream.read(BUF_SIZE)
+    buff = stream.read(buffer_size)
 
     while len(buff):
         label_end = buff.find('\0')
@@ -234,7 +228,7 @@ def get_label(stream, BUF_SIZE=65537):
             label.append(buff[:label_end])
             break
 
-        buff = stream.read(BUF_SIZE)
+        buff = stream.read(buffer_size)
 
     return ''.join(label)
 
