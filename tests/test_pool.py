@@ -2,5 +2,5 @@
 import pytest
 
 
-def test_commands():
+def test_pool():
     pytest.xfail('unimplemented')

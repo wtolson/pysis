@@ -1,22 +1,14 @@
-import unittest
-from pysis.binning import *
+# -*- coding: utf-8 -*-
+import pytest
 
 
-class TestConstWidthBinnedKeys(unittest.TestCase):
-    def test_test(self):
-        self.fail('Unimplemented')
+def test_const_width():
+    pytest.xfail('unimplemented')
 
 
-class TestBoundedBinnedKeys(unittest.TestCase):
-    def test_test(self):
-        self.fail('Unimplemented')
+def test_bounded():
+    pytest.xfail('unimplemented')
 
 
-class TestGeometricBinnedKeys(unittest.TestCase):
-    def test_test(self):
-        self.fail('Unimplemented')
-
-
-
-if __name__ == '__main__':
-    unittest.main()
+def test_geometric():
+    pytest.xfail('unimplemented')

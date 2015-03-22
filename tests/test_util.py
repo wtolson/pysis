@@ -1,12 +1,6 @@
-import unittest
-import pysis.util
+# -*- coding: utf-8 -*-
+import pytest
 
 
-class TestFileManipulation(unittest.TestCase):
-    def test_test(self):
-        self.fail('Unimplemented')
-
-
-
-if __name__ == '__main__':
-    unittest.main()
+def test_util():
+    pytest.xfail('unimplemented')
