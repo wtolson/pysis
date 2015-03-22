@@ -1,6 +1,23 @@
 # -*- coding: utf-8 -*-
-import pytest
+from pysis.util import (
+    file_variations,
+    ImageName,
+)
 
 
-def test_util():
-    pytest.xfail('unimplemented')
+def test_file_variations():
+    result = file_variations('image.IMG', ['.cub', '.cal.cub'])
+    assert len(result) == 2
+    assert result[0] == 'image.cub'
+    assert result[1] == 'image.cal.cub'
+
+    result = file_variations('foo/image', ['.TIFF'])
+    assert len(result) == 1
+    assert result[0] == 'foo/image.TIFF'
+
+
+def test_image_name():
+    assert str(ImageName('test')) == 'test'
+    assert str(ImageName('image').IMG) == 'image.IMG'
+    assert str(ImageName('image').cal.cub) == 'image.cal.cub'
+    assert str(ImageName('foo/image.bar').baz) == 'foo/image.bar.baz'
