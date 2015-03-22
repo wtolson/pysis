@@ -48,7 +48,7 @@ if ISIS_VERSION_MAJOR == 3:
     # the isis path to the end of the current path
     ISIS_PATH = path.join(ISIS_ROOT, 'bin')
     if os.environ.get('PATH'):
-        os.environ['PATH'] = '%s:%s' % (ISIS_ROOT, os.environ['PATH'])
+        os.environ['PATH'] = '%s:%s' % (ISIS_PATH, os.environ['PATH'])
     else:
         os.environ['PATH'] = ISIS_PATH
 
