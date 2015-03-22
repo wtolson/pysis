@@ -8,6 +8,8 @@ python:
   - "2.7"
   - "2.6"
 
-install: pip install -r requirements.txt
+install:
+  - pip install -r requirements.txt
+  - bash test/make_isis_env.sh
 
-script: py.test tests
+script: ISISROOT=/tmp/pysis/isis py.test tests

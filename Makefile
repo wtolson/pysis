@@ -27,11 +27,14 @@ clean-pyc:
 lint:
 	flake8 pysis tests
 
-test:
-	py.test
+test-env:
+	bash tests/make_isis_env.sh
 
-test-all:
-	tox
+test: test-env
+	ISISROOT=/tmp/pysis/isis py.test
+
+test-all: test-env
+	ISISROOT=/tmp/pysis/isis tox
 
 coverage:
 	coverage run --source pysis py.test
