@@ -6,8 +6,9 @@ Utilities to help with common Isis patterns.
 
 __all__ = [
     'write_file_list',
-    'file_variations'
+    'file_variations',
+    'ImageName',
 ]
 
 
-from file_manipulation import write_file_list, file_variations
+from file_manipulation import write_file_list, file_variations, ImageName

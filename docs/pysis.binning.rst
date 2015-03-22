@@ -4,34 +4,34 @@ pysis.binning package
 Submodules
 ----------
 
-pysis.binning.AbstractBinnedKeys module
----------------------------------------
+pysis.binning.abstract module
+-----------------------------
 
-.. automodule:: pysis.binning.AbstractBinnedKeys
+.. automodule:: pysis.binning.abstract
     :members:
     :undoc-members:
     :show-inheritance:
 
-pysis.binning.BoundedBinnedKeys module
---------------------------------------
+pysis.binning.bounded module
+----------------------------
 
-.. automodule:: pysis.binning.BoundedBinnedKeys
+.. automodule:: pysis.binning.bounded
     :members:
     :undoc-members:
     :show-inheritance:
 
-pysis.binning.ConstWidthBinnedKeys module
------------------------------------------
+pysis.binning.const_width module
+--------------------------------
 
-.. automodule:: pysis.binning.ConstWidthBinnedKeys
+.. automodule:: pysis.binning.const_width
     :members:
     :undoc-members:
     :show-inheritance:
 
-pysis.binning.GeometricBinnedKeys module
-----------------------------------------
+pysis.binning.geometric module
+------------------------------
 
-.. automodule:: pysis.binning.GeometricBinnedKeys
+.. automodule:: pysis.binning.geometric
     :members:
     :undoc-members:
     :show-inheritance:

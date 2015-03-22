@@ -27,20 +27,18 @@ class GeometricBinnedKeys(AbstractBinnedKeys):
         self.bins = [[] for _ in xrange(self.num_bins)]
 
     def get_bin_index(self, value):
-        """
-        Used to get the index of the bin to place a particular value.
-        """
+        """Used to get the index of the bin to place a particular value."""
         if value == self.max_value:
             return self.num_bins - 1
 
         return int(self.C * log(value / self.min_value))
 
     def get_bounds(self, bin_num):
-        """
-        Get the bonds of a bin, given its index `bin_num`. A `Bounds` namedtuple
-        is returned with properties min and max respectively.
+        """Get the bonds of a bin, given its index `bin_num`.
+
+        :returns: a `Bounds` namedtuple with properties min and max
+            respectively.
         """
         min_value = pow(2.0, float(bin_num) / 2.0) * self.min_value
         max_value = pow(2.0, float(bin_num + 1.0) / 2.0) * self.min_value
-
         return self.Bounds(min_value, max_value)

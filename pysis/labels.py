@@ -187,13 +187,12 @@ class LabelParser(object):
 def get_label(stream, buffer_size=io.DEFAULT_BUFFER_SIZE):
     """Extract the label string from an isis file.
 
-    Arguments:
-        stream: If stream is a string it will be treated as a filename other
-            wise it will be treated as if it were a file object.
-        buffer_size: The chunksize to read the label in by.
+    :param stream: ff stream is a string it will be treated as a filename
+        otherwise it will be treated as if it were a file object
 
-    Returns:
-        The label of the isis file as a string.
+    :param buffer_size: the chunksize to read the label in by
+
+    :returns: the label of the isis file as a string
     """
     if isinstance(stream, basestring):
         with open(stream) as f:
@@ -217,27 +216,24 @@ def get_label(stream, buffer_size=io.DEFAULT_BUFFER_SIZE):
 
 
 def parse_label(label, split_units=True):
-    """ Parse an isis label.
+    """Parse an isis label from a string.
 
-    Arguments:
-        label: An isis label as a string.
-        split_units: A boolean specifying whether to parse units from values.
+    :param label: an isis label as a string
+    :param split_units: a boolean specifying whether to parse units from values
 
-    Returns:
-        A dictionary representation of the given isis label.
+    :returns: a dictionary representation of the given isis label
     """
     return LabelParser(split_units=split_units).parse(label)
 
 
 def parse_file_label(stream, split_units=True):
-    """ Parse an isis label.
+    """Parse an isis label from a stream.
 
-    Arguments:
-        stream: If stream is a string it will be treated as a filename other
-            wise it will be treated as if it were a file object.
-        split_units: A boolean specifying whether to parse units from values.
+    :param stream: if stream is a string it will be treated as a filename
+        otherwise it will be treated as if it were a file object
 
-    Returns:
-        A dictionary representation of the given isis label.
+    :param split_units: a boolean specifying whether to parse units from values.
+
+    :returns: a dictionary representation of the given isis label.
     """
     return parse_label(get_label(stream), split_units=split_units)

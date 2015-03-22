@@ -9,13 +9,14 @@ from os.path import splitext
 
 
 def write_file_list(filename, file_list=[], glob=None):
-    """ Write a list of files to a file.
+    """Write a list of files to a file.
 
-    Arguments:
-        filename: The name of the file to write the list to.
-        file_list: A list of filenames to write to a file.
-        glob: If glob is specified, it will ignore file_list and instead create
-            a list of files based on the pattern provide by glob (ex. *.cub).
+    :param filename: the name of the file to write the list to
+
+    :param file_list: a list of filenames to write to a file
+
+    :param glob: if glob is specified, it will ignore file_list and instead
+        create a list of files based on the pattern provide by glob (ex. *.cub)
     """
     if glob:
         file_list = iglob(glob)
@@ -26,14 +27,14 @@ def write_file_list(filename, file_list=[], glob=None):
 
 
 def file_variations(filename, extensions):
-    """ Create a variation of file names.
+    """Create a variation of file names.
 
     Generate a list of variations on a filename by replacing the extension with
     a the provided list.
 
-    Arguments:
-        filename: The original file name to use as a base.
-        extensions: A list of file extensions to generate new filenames.
+    :param filename: The original file name to use as a base.
+
+    :param extensions: A list of file extensions to generate new filenames.
     """
     (label, ext) = splitext(filename)
     return [label + extention for extention in extensions]

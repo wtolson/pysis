@@ -104,23 +104,22 @@ the above MDIS calibration script for multiple images in multiple processes we
 could rewrite the function as so::
 
     from pysis import IsisPool
-    from pysis.util import file_variations
+    from pysis.util import ImageName
 
     def calibrate_mdis(images):
-        images = [(img_name,) + file_variations(img_name, ['.cub', '.cal.cub'])
-                    for img_name in images]
+        images = [ImageName(filename) for filename in images]
 
         with IsisPool() as isis_pool:
-            for img_name, cub_name, cal_name in images:
-                isis_pool.mdis2isis(from_=img_name, to=cub_name)
+            for filename in images:
+                isis_pool.mdis2isis(from_=filename.IMG, to=filename.cub)
 
         with IsisPool() as isis_pool:
-            for img_name, cub_name, cal_name in images:
-                isis_pool.spiceinit(from_=cub_name)
+            for filename in images:
+                isis_pool.spiceinit(from_=filename.cub)
 
         with IsisPool() as isis_pool:
-            for img_name, cub_name, cal_name in images:
-                isis_pool.mdiscal(from_=cub_name, to=cal_name)
+            for filename in images:
+                isis_pool.mdiscal(from_=filename.cub, to=filename.cal.cub)
 
 When using IsisPool we can't determine which order commands will be executed in
 so we much run each command for all the files as a group before moving to the

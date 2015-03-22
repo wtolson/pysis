@@ -16,9 +16,7 @@ class BoundsError(IndexError):
 
 
 class AbstractBinnedKeys(object):
-    """
-    Flexible base class for binning data.
-    """
+    """Flexible base class for binning data."""
     __metaclass__ = ABCMeta
 
     Item = namedtuple('Item', ['key', 'value', 'data'])
@@ -26,23 +24,23 @@ class AbstractBinnedKeys(object):
 
     @abstractmethod
     def get_bin_index(self, value):
-        """
-        Used to get the index of the bin to place a particular value.
-        """
+        """Get the index of the bin to place a particular value."""
         pass
 
     @abstractmethod
     def get_bounds(self, bin_num):
-        """
-        Get the bonds of a bin, given its index `bin_num`. A `Bounds` namedtuple
-        is returned with properties min and max respectively.
+        """Get the bounds of a bin, given its index `bin_num`.
+
+        :returns: a `Bounds` namedtuple with properties min and max
+            respectively.
         """
         pass
 
     def insert(self, key, value, data={}):
-        """
-        Insert the `key` into a bin based on the given `value`. Optionally,
-        `data` dictionary may be provided to attach arbitrary data to the key.
+        """Insert the `key` into a bin based on the given `value`.
+
+        Optionally, `data` dictionary may be provided to attach arbitrary data
+        to the key.
         """
         if value < self.min_value or value > self.max_value:
             raise BoundsError('item value out of bounds')
@@ -53,9 +51,7 @@ class AbstractBinnedKeys(object):
         self.bins[index].append(item)
 
     def iterkeys(self):
-        """
-        An iterator over the keys of each bin.
-        """
+        """An iterator over the keys of each bin."""
         def _iterkeys(bin):
             for item in bin:
                 yield item.key
@@ -64,20 +60,14 @@ class AbstractBinnedKeys(object):
             yield _iterkeys(bin)
 
     def iterbounds(self):
-        """
-        An iterator over each bins bounds.
-        """
+        """An iterator over each bins bounds."""
         for bin_num in xrange(self.num_bins):
             yield self.get_bounds(bin_num)
 
     def iterbins_bounds(self):
-        """
-        Iterate over each bin and its bounds.
-        """
+        """Iterate over each bin and its bounds."""
         return izip(self.bins, self.iterbounds())
 
     def iterkeys_bounds(self):
-        """
-        Iterate over the keys of each bin as well as its bounds.
-        """
+        """Iterate over the keys of each bin as well as its bounds."""
         return izip(self.iterkeys(), self.iterbounds())

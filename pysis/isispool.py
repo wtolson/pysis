@@ -1,35 +1,5 @@
 # -*- coding: utf-8 -*-
 
-""" Simple multiprocessing for Isis commands.
-
-Usage:
-    Example for running the following isis script in parallel for a list of
-    images.
-
-        mdis2isis from=filename.IMG to=filename.cub
-        spiceinit from=filename.cub
-        mdiscal from=filename.cub to=filename.cal.cub
-
-    from pysis import IsisPool
-    from pysis.util import file_variations
-
-    def calibrate_mdis(images):
-        images = [(img_name,) + file_variations(img_name, ['.cub', '.cal.cub'])
-                    for img_name in images]
-
-        with IsisPool() as isis_pool:
-            for img_name, cub_name, cal_name in images:
-                isis_pool.mdis2isis(from_=img_name, to=cub_name)
-
-        with IsisPool() as isis_pool:
-            for img_name, cub_name, cal_name in images:
-                isis_pool.spiceinit(from_=cub_name)
-
-        with IsisPool() as isis_pool:
-            for img_name, cub_name, cal_name in images:
-                isis_pool.mdiscal(from_=cub_name, to=cal_name)
-
-"""
 from multiprocessing import Pool
 from subprocess import check_output
 
@@ -52,11 +22,50 @@ class QueuedIsisCommand(IsisCommand):
 
 
 class IsisPool(Isis):
+    """Multiprocessing pool for ISIS commands.
+
+    Example for running the following isis script in parallel for a list of
+    images.
+
+    On the command line::
+
+        mdis2isis from=filename.IMG to=filename.cub
+        spiceinit from=filename.cub
+        mdiscal from=filename.cub to=filename.cal.cub
+
+    With pysis::
+
+        from pysis import IsisPool
+        from pysis.util import ImageName
+
+        def calibrate_mdis(images):
+            images = [ImageName(filename) for filename in images]
+
+            with IsisPool() as isis_pool:
+                for filename in images:
+                    isis_pool.mdis2isis(from_=filename.IMG, to=filename.cub)
+
+            with IsisPool() as isis_pool:
+                for filename in images:
+                    isis_pool.spiceinit(from_=filename.cub)
+
+            with IsisPool() as isis_pool:
+                for filename in images:
+                    isis_pool.mdiscal(from_=filename.cub, to=filename.cal.cub)
+
+    :param strict: when in strict mode, the isis pool will initialize its
+        attributes with commands from the isis environment. Otherwise attributes
+        are dynamically added as use
+
+    :param **kwargs: additional parameters used to initialize the
+        multiprocessing pool
+    """
+
     def __init__(self, strict=False, *args, **kwargs):
         self.pool = Pool(*args, **kwargs)
-
         self._strict = strict
-        if strict:
+
+        if self._strict:
             for name, cmd in self._get_commands():
                 cmd = QueuedIsisCommand(cmd)
                 setattr(self, name, cmd)
@@ -71,8 +80,12 @@ class IsisPool(Isis):
         return QueuedIsisCommand(name, self)
 
     def close_and_wait(self):
-        self.close()
-        self.join()
+        """Close the pool and wait for all commands to complete.
+
+        This will be automatically called if used as a context manager.
+        """
+        self.pool.close()
+        self.pool.join()
 
     def __enter__(self):
         return self

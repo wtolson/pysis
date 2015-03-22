@@ -27,20 +27,17 @@ class ConstWidthBinnedKeys(AbstractBinnedKeys):
         self.bins = [[] for _ in xrange(self.num_bins)]
 
     def get_bin_index(self, value):
-        """
-        Used to get the index of the bin to place a particular value.
-        """
+        """Used to get the index of the bin to place a particular value."""
         if value == self.max_value:
             return self.num_bins - 1
-
         return int((value - self.min_value) / self.bin_size)
 
     def get_bounds(self, bin_num):
-        """
-        Get the bonds of a bin, given its index `bin_num`. A `Bounds` namedtuple
-        is returned with properties min and max respectively.
+        """Get the bonds of a bin, given its index `bin_num`.
+
+        :returns: a `Bounds` namedtuple with properties min and max
+            respectively.
         """
         min_bound = (self.bin_size * bin_num) + self.min_value
         max_bound = min_bound + self.bin_size
-
         return self.Bounds(min_bound, max_bound)

@@ -14,6 +14,9 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   isispool
+   cubefile
+   labels
    contributing
    authors
    history
