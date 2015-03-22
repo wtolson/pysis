@@ -18,6 +18,10 @@ def test_root():
     assert ISIS_ROOT == os.environ['ISISROOT']
 
 
+def test_path():
+    assert os.path.join(ISIS_ROOT, 'bin') in os.environ['PATH'].split(':')
+
+
 def test_version():
     assert isinstance(ISIS_VERSION_MAJOR, int)
     assert isinstance(ISIS_VERSION_MINOR, int)
