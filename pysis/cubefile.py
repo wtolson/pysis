@@ -27,20 +27,21 @@ class CubeFile(object):
 
     SPECIAL_PIXELS = SPECIAL_PIXELS
 
-    def __new__(cls, stream, filename=None):
-        if not isinstance(stream, basestring):
-            return super(CubeFile, cls).__new__(cls, stream, filename)
+    @classmethod
+    def open(cls, filename):
+        """Read an Isis Cube file from disk.
 
-        with open(stream) as fp:
-            return super(CubeFile, cls).__new__(cls, fp, stream)
+        :param filename: name of file to read as an isis file
+        """
+        with open(filename) as fp:
+            return cls(fp, filename)
 
     def __init__(self, stream, filename=None):
         """Create an Isis Cube file.
 
-        :param stream: the file name or file object to read as an isis file
+        :param stream: file object to read as an isis cube file
 
-        :param filename: ff stream is a file object, an optional filename to
-            attach to the object
+        :param filename: an optional filename to attach to the object
         """
         #: The filename if given, otherwise none.
         self.filename = filename
@@ -127,7 +128,7 @@ class CubeFile(object):
             from PIL import Image
 
             # Read in the image and create the image data
-            image = CubeFile('test.cub')
+            image = CubeFile.open('test.cub')
             data = image.get_image_array()
 
             # Save the first band to a new file
@@ -205,6 +206,7 @@ class CubeFile(object):
 
     @property
     def start_byte(self):
+        """Index of the start of the image data (zero indexed)."""
         return self.label['IsisCube']['Core']['StartByte'] - 1
 
     @property
