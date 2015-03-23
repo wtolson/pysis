@@ -31,13 +31,13 @@ test-env:
 	bash tests/make_isis_env.sh
 
 test: test-env
-	ISISROOT=/tmp/pysis/isis py.test
+	ISISROOT=/tmp/pysis/isis py.test tests
 
 test-all: test-env
-	ISISROOT=/tmp/pysis/isis tox
+	tox
 
 coverage:
-	coverage run --source pysis py.test
+	ISISROOT=/tmp/pysis/isis coverage run --source pysis py.test tests
 	coverage report -m
 	coverage html
 	open htmlcov/index.html
