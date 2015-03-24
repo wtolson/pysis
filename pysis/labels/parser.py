@@ -64,7 +64,7 @@ class LabelParser(object):
     delimiter_chars = whitespace | reserved_chars
     eof_chars = (b'', b'\0')
 
-    quote_marks = (b'"', "'")
+    quote_marks = (b'"', b"'")
     end_tokens = (b'End', b'END')
 
     begin_group_tokens = (b'Group', b'GROUP', b'BEGIN_GROUP')
