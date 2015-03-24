@@ -22,8 +22,12 @@ def test_echo():
     isis = Isis(strict=True)
     assert isis.isis_echo(foo='bar') == 0
     assert isis.isis_echo.check_output() == '\n'
-    assert isis.isis_echo.check_output(foo='bar', baz='bang') == 'foo=bar baz=bang\n'  # noqa
     assert isis.isis_echo.check_output(from_='to') == 'from=to\n'
+
+    output = isis.isis_echo.check_output(foo='bar', baz='bang').split()
+    assert len(output) == 2
+    assert 'foo=bar' in output
+    assert 'baz=bang' in output
 
 
 def test_strict():
