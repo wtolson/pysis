@@ -1,7 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
-import pytest
+import datetime
+from dateutil import tz
+
 from pysis import labels
+from pysis.labels.parser import (
+    Label,
+    LabelGroup,
+    LabelObject,
+    Units,
+)
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
@@ -9,7 +17,7 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
 
 def test_assignment():
     label = labels.parse_label('foo=bar')
-    assert isinstance(label, dict)
+    assert isinstance(label, Label)
     assert label['foo'] == 'bar'
 
 
@@ -17,14 +25,28 @@ def test_spaceing():
     label = labels.parse_label("""
         foo = bar
         nospace=good
-          lots_of_spaceing    =    also good
+          lots_of_spaceing    =    alsogood
+        same = line no = problem; like=aboss
         End
     """)
 
-    assert isinstance(label, dict)
+    assert isinstance(label, Label)
     assert label['foo'] == 'bar'
     assert label['nospace'] == 'good'
-    assert label['lots_of_spaceing'] == 'also good'
+    assert label['lots_of_spaceing'] == 'alsogood'
+    assert label['same'] == 'line'
+    assert label['no'] == 'problem'
+    assert label['like'] == 'aboss'
+
+
+def test_linewrap():
+    label = labels.parse_label("""
+        foo = bar-
+              baz
+        End
+    """)
+
+    assert label['foo'] == 'barbaz'
 
 
 def test_integers():
@@ -52,6 +74,7 @@ def test_integers():
 def test_floats():
     label = labels.parse_label("""
         float = 1.0
+        float_no_decimal = 2.
         float_no_whole = .3
         float_leading_zero = 0.5
         positive_float = +2.0
@@ -61,6 +84,9 @@ def test_floats():
     """)
     assert isinstance(label['float'], float)
     assert label['float'] == 1.0
+
+    assert isinstance(label['float_no_decimal'], float)
+    assert label['float_no_decimal'] == 2.0
 
     assert isinstance(label['float_no_whole'], float)
     assert label['float_no_whole'] == 0.3
@@ -94,18 +120,15 @@ def test_objects():
         End
     """)
     test_object = label['test_object']
-    assert isinstance(test_object, dict)
-    assert test_object['__type__'] == 'Object'
+    assert isinstance(test_object, LabelObject)
     assert test_object['foo'] == 'bar'
 
     embedded_object = test_object['embedded_object']
-    assert isinstance(embedded_object, dict)
-    assert embedded_object['__type__'] == 'Object'
+    assert isinstance(embedded_object, LabelObject)
     assert embedded_object['foo'] == 'bar'
 
     embedded_group = test_object['embedded_group']
-    assert isinstance(embedded_group, dict)
-    assert embedded_group['__type__'] == 'Group'
+    assert isinstance(embedded_group, LabelGroup)
     assert embedded_group['foo'] == 'bar'
 
 
@@ -124,59 +147,81 @@ def test_groups():
         End
     """)
     test_group = label['test_group']
-    assert isinstance(test_group, dict)
-    assert test_group['__type__'] == 'Group'
+    assert isinstance(test_group, LabelGroup)
     assert test_group['foo'] == 'bar'
 
     embedded_object = test_group['embedded_object']
-    assert isinstance(embedded_object, dict)
-    assert embedded_object['__type__'] == 'Object'
+    assert isinstance(embedded_object, LabelObject)
     assert embedded_object['foo'] == 'bar'
 
     embedded_group = test_group['embedded_group']
-    assert isinstance(embedded_group, dict)
-    assert embedded_group['__type__'] == 'Group'
+    assert isinstance(embedded_group, LabelGroup)
     assert embedded_group['foo'] == 'bar'
 
 
-@pytest.mark.xfail
-def test_float_corner_cases():
+def test_alt_group_style():
     label = labels.parse_label("""
-        float_no_decimal = 2.
-        End
+        OBJECT               = TEST1
+          FOO                = BAR
+        END_OBJECT           = TEST1
+
+        GROUP                = TEST2
+          FOO                = BAR
+        END_GROUP            = TEST2
+
+        END
     """)
+    test_group = label['TEST1']
+    assert isinstance(test_group, LabelObject)
+    assert test_group['FOO'] == 'BAR'
 
-    assert isinstance(label['float_no_decimal'], float)
-    assert label['float_no_decimal'] == 2.0
+    embedded_object = label['TEST2']
+    assert isinstance(embedded_object, LabelGroup)
+    assert embedded_object['FOO'] == 'BAR'
 
 
-@pytest.mark.xfail
 def test_binary():
     label = labels.parse_label("""
         binary_number = 2#0101#
+        positive_binary_number = +2#0101#
+        negative_binary_number = -2#0101#
         End
     """)
 
     assert isinstance(label['binary_number'], int)
     assert label['binary_number'] == 5
 
+    assert isinstance(label['positive_binary_number'], int)
+    assert label['positive_binary_number'] == 5
 
-@pytest.mark.xfail
+    assert isinstance(label['negative_binary_number'], int)
+    assert label['negative_binary_number'] == -5
+
+
 def test_octal():
     label = labels.parse_label("""
         octal_number = 8#0107#
+        positive_octal_number = +8#0107#
+        negative_octal_number = -8#0107#
         End
     """)
 
     assert isinstance(label['octal_number'], int)
     assert label['octal_number'] == 71
 
+    assert isinstance(label['positive_octal_number'], int)
+    assert label['positive_octal_number'] == 71
 
-@pytest.mark.xfail
+    assert isinstance(label['negative_octal_number'], int)
+    assert label['negative_octal_number'] == -71
+
+
 def test_hex():
     label = labels.parse_label("""
         hex_number_upper = 16#100A#
         hex_number_lower = 16#100b#
+        positive_hex_number = +16#100A#
+        negative_hex_number = -16#100A#
         End
     """)
 
@@ -186,8 +231,13 @@ def test_hex():
     assert isinstance(label['hex_number_lower'], int)
     assert label['hex_number_lower'] == 4107
 
+    assert isinstance(label['positive_hex_number'], int)
+    assert label['positive_hex_number'] == 4106
 
-@pytest.mark.xfail
+    assert isinstance(label['negative_hex_number'], int)
+    assert label['negative_hex_number'] == -4106
+
+
 def test_quotes():
     label = labels.parse_label("""
         foo = 'bar'
@@ -197,6 +247,10 @@ def test_quotes():
         single = 'single"quotes'
         number = '123'
         date = '1918-05-11'
+        multiline = 'this is a
+                     multi-line string'
+        continuation = "The planet Jupi-
+                        ter is very big"
         End
     """)
 
@@ -207,7 +261,7 @@ def test_quotes():
     assert label['empty'] == ''
 
     assert isinstance(label['space'], str)
-    assert label['space'] == '  test  '
+    assert label['space'] == 'test'
 
     assert isinstance(label['double'], str)
     assert label['double'] == "double'quotes"
@@ -221,24 +275,90 @@ def test_quotes():
     assert isinstance(label['date'], str)
     assert label['date'] == '1918-05-11'
 
+    assert isinstance(label['multiline'], str)
+    assert label['multiline'] == 'this is a multi-line string'
 
-@pytest.mark.xfail
+    assert isinstance(label['continuation'], str)
+    assert label['continuation'] == 'The planet Jupiter is very big'
+
+
 def test_comments():
     label = labels.parse_label("""
         /* comment on line */
         foo = bar /* comment at end of line */
+        weird/* in the */=/*middle*/comments
         End
     """)
 
     assert isinstance(label['foo'], str)
-    assert label['octal_number'] == 'bar'
+    assert label['foo'] == 'bar'
+
+    assert isinstance(label['foo'], str)
+    assert label['weird'] == 'comments'
 
 
 def test_dates():
-    pytest.xfail('unimplemented')
+    label = labels.parse_label("""
+        date1          = 1990-07-04
+        date2          = 1990-158
+        date3          = 2001-001
+        time1          = 12:00
+        time_s         = 12:00:45
+        time_s_float   = 12:00:45.4571
+        time_tz1       = 15:24:12Z
+        time_tz2       = 01:12:22+07
+        time_tz3       = 01:12:22+7
+        time_tz4       = 01:10:39.4575+07
+        datetime1      = 1990-07-04T12:00
+        datetime2      = 1990-158T15:24:12Z
+        datetime3      = 2001-001T01:10:39+7
+        datetime4      = 2001-001T01:10:39.457591+7
+        End
+    """)
+
+    assert isinstance(label['date1'], datetime.date)
+    assert label['date1'] == datetime.date(1990, 07, 04)
+
+    assert isinstance(label['date2'], datetime.date)
+    assert label['date2'] == datetime.date(1990, 6, 7)
+
+    assert isinstance(label['date3'], datetime.date)
+    assert label['date3'] == datetime.date(2001, 1, 1)
+
+    assert isinstance(label['time1'], datetime.time)
+    assert label['time1'] == datetime.time(12)
+
+    assert isinstance(label['time_s'], datetime.time)
+    assert label['time_s'] == datetime.time(12, 0, 45)
+
+    assert isinstance(label['time_s_float'], datetime.time)
+    assert label['time_s_float'] == datetime.time(12, 0, 45, 457100)
+
+    assert isinstance(label['time_tz1'], datetime.time)
+    assert label['time_tz1'] == datetime.time(15, 24, 12, tzinfo=tz.tzutc())
+
+    assert isinstance(label['time_tz2'], datetime.time)
+    assert label['time_tz2'] == datetime.time(1, 12, 22, tzinfo=tz.tzoffset(None, 25200))  # noqa
+
+    assert isinstance(label['time_tz3'], datetime.time)
+    assert label['time_tz3'] == datetime.time(1, 12, 22, tzinfo=tz.tzoffset(None, 25200))  # noqa
+
+    assert isinstance(label['time_tz4'], datetime.time)
+    assert label['time_tz4'] == datetime.time(1, 10, 39, 457500, tz.tzoffset(None, 25200))  # noqa
+
+    assert isinstance(label['datetime1'], datetime.datetime)
+    assert label['datetime1'] == datetime.datetime(1990, 07, 04, 12)
+
+    assert isinstance(label['datetime2'], datetime.datetime)
+    assert label['datetime2'] == datetime.datetime(1990, 6, 7, 15, 24, 12, tzinfo=tz.tzutc())  # noqa
+
+    assert isinstance(label['datetime3'], datetime.datetime)
+    assert label['datetime3'] == datetime.datetime(2001, 1, 1, 1, 10, 39, tzinfo=tz.tzoffset(None, 25200))  # noqa
+
+    assert isinstance(label['datetime4'], datetime.datetime)
+    assert label['datetime4'] == datetime.datetime(2001, 1, 1, 1, 10, 39, 457591, tz.tzoffset(None, 25200))  # noqa
 
 
-@pytest.mark.xfail
 def test_set():
     label = labels.parse_label("""
         strings = {a, b, c}
@@ -292,6 +412,7 @@ def test_sequence():
         nospace=(a,b,c)
         numbers = (1, 2, 3)
         mixed = (a, 1, 2.5)
+        empty = ()
         multiline = (a,
                      b,
                      c)
@@ -322,6 +443,9 @@ def test_sequence():
     assert label['mixed'][1] == 1
     assert label['mixed'][2] == 2.5
 
+    assert isinstance(label['empty'], list)
+    assert len(label['empty']) == 0
+
     assert isinstance(label['multiline'], list)
     assert len(label['multiline']) == 3
     assert label['multiline'][0] == 'a'
@@ -329,29 +453,54 @@ def test_sequence():
     assert label['multiline'][2] == 'c'
 
 
-@pytest.mark.xfail
-def test_sequence_corner_cases():
-    label = labels.parse_label("""
-        empty = ()
-        End
-    """)
-    assert isinstance(label['empty'], list)
-    assert len(label['empty']) == 0
-
-
 def test_units():
     label = labels.parse_label("""
         foo = 42 <beards>
         g = 9.8 <m/s>
+        list = (1, 2, 3) <numbers>
+        cool = (1 <number>)
         End
     """)
-    assert isinstance(label['foo'], dict)
-    assert label['foo']['value'] == 42
-    assert label['foo']['units'] == 'beards'
+    assert isinstance(label['foo'], Units)
+    assert label['foo'].value == 42
+    assert label['foo'].units == 'beards'
 
-    assert isinstance(label['g'], dict)
-    assert label['g']['value'] == 9.8
-    assert label['g']['units'] == 'm/s'
+    assert isinstance(label['g'], Units)
+    assert label['g'].value == 9.8
+    assert label['g'].units == 'm/s'
+
+    assert isinstance(label['list'], Units)
+    assert isinstance(label['list'].value, list)
+    assert label['list'].units == 'numbers'
+
+    assert isinstance(label['cool'], list)
+    assert isinstance(label['cool'][0], Units)
+    assert label['cool'][0].value == 1
+    assert label['cool'][0].units == 'number'
+
+
+def test_delimiters():
+    label = labels.parse_label("""
+        foo = 1;
+        Object = embedded_object;
+          foo = bar;
+        End_Object;
+        bar = 2;
+        Group = embedded_group;
+          foo = bar;
+        End_Group;
+        End;
+    """)
+
+    assert isinstance(label, Label)
+    assert label['foo'] == 1
+    assert label['bar'] == 2
+
+    assert isinstance(label['embedded_object'], LabelObject)
+    assert label['embedded_object']['foo'] == 'bar'
+
+    assert isinstance(label['embedded_group'], LabelGroup)
+    assert label['embedded_group']['foo'] == 'bar'
 
 
 def test_cube_label():
