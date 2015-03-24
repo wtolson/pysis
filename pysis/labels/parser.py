@@ -110,6 +110,14 @@ class LabelParser(object):
     datetime_month_day_re = re.compile(DATETIME_MONTH_DAY_RE)
     datetime_day_of_year_re = re.compile(DATETIME_DAY_OF_YEAR_RE)
 
+    formatting_chars = {
+        r'\n': '\n',
+        r'\t': '\t',
+        r'\f': '\f',
+        r'\v': '\v',
+        r'\\': '\\',
+    }
+
     def peek(self, stream, n, offset=0):
         return stream.peek(n + offset)[offset:n]
 
@@ -603,7 +611,12 @@ class LabelParser(object):
 
     def format_quoated_string(self, value):
         value = self.line_continuation_re.sub('', value)
-        return ' '.join(value.split()).strip()
+        value = ' '.join(value.split()).strip()
+
+        for escape, char in self.formatting_chars.items():
+            value = value.replace(escape, char)
+
+        return value.decode('utf-8')
 
     def has_unquoated_string(self, stream):
         next = self.peek(stream, 1)
@@ -660,7 +673,7 @@ class LabelParser(object):
         if self.is_datetime_day_of_year(value):
             return self.parse_datetime_day_of_year(value)
 
-        return value
+        return value.decode('utf-8')
 
     def is_integer(self, value):
         return bool(self.integer_re.match(value))

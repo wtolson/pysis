@@ -67,7 +67,7 @@ def test_integers():
     assert isinstance(label['negitive_integer'], int)
     assert label['negitive_integer'] == -1
 
-    assert isinstance(label['invalid_integer'], str)
+    assert isinstance(label['invalid_integer'], unicode)
     assert label['invalid_integer'] == '1a2'
 
 
@@ -100,7 +100,7 @@ def test_floats():
     assert isinstance(label['negative_float'], float)
     assert label['negative_float'] == -1.0
 
-    assert isinstance(label['invalid_float'], str)
+    assert isinstance(label['invalid_float'], unicode)
     assert label['invalid_float'] == '1.2.3'
 
 
@@ -251,35 +251,39 @@ def test_quotes():
                      multi-line string'
         continuation = "The planet Jupi-
                         ter is very big"
+        formating = "\\n\\t\\f\\v\\\\\\n\\t\\f\\v\\\\"
         End
     """)
 
-    assert isinstance(label['foo'], str)
+    assert isinstance(label['foo'], unicode)
     assert label['foo'] == 'bar'
 
-    assert isinstance(label['empty'], str)
+    assert isinstance(label['empty'], unicode)
     assert label['empty'] == ''
 
-    assert isinstance(label['space'], str)
+    assert isinstance(label['space'], unicode)
     assert label['space'] == 'test'
 
-    assert isinstance(label['double'], str)
+    assert isinstance(label['double'], unicode)
     assert label['double'] == "double'quotes"
 
-    assert isinstance(label['single'], str)
+    assert isinstance(label['single'], unicode)
     assert label['single'] == 'single"quotes'
 
-    assert isinstance(label['number'], str)
+    assert isinstance(label['number'], unicode)
     assert label['number'] == '123'
 
-    assert isinstance(label['date'], str)
+    assert isinstance(label['date'], unicode)
     assert label['date'] == '1918-05-11'
 
-    assert isinstance(label['multiline'], str)
+    assert isinstance(label['multiline'], unicode)
     assert label['multiline'] == 'this is a multi-line string'
 
-    assert isinstance(label['continuation'], str)
+    assert isinstance(label['continuation'], unicode)
     assert label['continuation'] == 'The planet Jupiter is very big'
+
+    assert isinstance(label['formating'], unicode)
+    assert label['formating'] == '\n\t\f\v\\\n\t\f\v\\'
 
 
 def test_comments():
@@ -290,10 +294,10 @@ def test_comments():
         End
     """)
 
-    assert isinstance(label['foo'], str)
+    assert isinstance(label['foo'], unicode)
     assert label['foo'] == 'bar'
 
-    assert isinstance(label['foo'], str)
+    assert isinstance(label['foo'], unicode)
     assert label['weird'] == 'comments'
 
 
