@@ -2,7 +2,7 @@ import re
 import itertools
 import collections
 import datetime
-import dateutil.parser
+import pytz
 
 from .stream import BufferedStream, ByteStream
 from ._collections import OrderedMultiDict
@@ -34,7 +34,7 @@ RE_FRAGMENTS = {
     'day_of_month': r'(0[1-9]|[1-2][0-9]|3[0-1])',
     'day_of_year': r'(00[1-9]|0[1-9][0-9]|[1-2][0-9][0-9]|3[0-5][0-9]|36[0-6])',
     'hour': r'([0-1][0-9]|2[0-3])',
-    'minute': r'[0-5][0-9]',
+    'minute': r'([0-5][0-9])',
     'month': r'(0[1-9]|1[0-2])',
     # 60 is allowed for leap seconds
     'seconds': r'(?:([0-5][0-9]|60)(?:\.([0-9]*))?)',
@@ -684,14 +684,28 @@ class LabelParser(object):
         return bool(self.time_re.match(value))
 
     def parse_time(self, value):
-        value = dateutil.parser.parse(value)
-        return value.time().replace(tzinfo=value.tzinfo)
+        match = self.time_re.match(value)
+        hour, minute, second, microsecond, timezone = match.groups()
+        second = second or '0'
+        microsecond = (microsecond or '0').ljust(6, '0')[:6]
+        return datetime.time(
+            hour=int(hour, 10),
+            minute=int(minute, 10),
+            second=int(second, 10),
+            microsecond=int(microsecond, 10),
+            tzinfo=self.parse_timezone(timezone),
+        )
 
     def is_date_month_day(self, value):
         return bool(self.date_month_day_re.match(value))
 
     def parse_date_month_day(self, value):
-        return dateutil.parser.parse(value).date()
+        year, month, day = self.date_month_day_re.match(value).groups()
+        return datetime.date(
+            year=int(year, 10),
+            month=int(month, 10),
+            day=int(day, 10),
+        )
 
     def is_date_day_of_year(self, value):
         return bool(self.date_day_of_year_re.match(value))
@@ -706,22 +720,31 @@ class LabelParser(object):
         return bool(self.datetime_month_day_re.match(value))
 
     def parse_datetime_month_day(self, value):
-        return dateutil.parser.parse(value)
+        date, time = value.split('T')
+        return datetime.datetime.combine(
+            self.parse_date_month_day(date),
+            self.parse_time(time),
+        )
 
     def is_datetime_day_of_year(self, value):
         return bool(self.datetime_day_of_year_re.match(value))
 
     def parse_datetime_day_of_year(self, value):
         date, time = value.split('T')
-        date = self.parse_date_day_of_year(date)
-        time = self.parse_time(time)
-        return datetime.datetime(
-            year=date.year,
-            month=date.month,
-            day=date.day,
-            hour=time.hour,
-            minute=time.minute,
-            second=time.second,
-            microsecond=time.microsecond,
-            tzinfo=time.tzinfo,
+        return datetime.datetime.combine(
+            self.parse_date_day_of_year(date),
+            self.parse_time(time),
         )
+
+    def parse_timezone(self, timezone):
+        if not timezone:
+            return None
+
+        if timezone.upper() == 'Z':
+            return pytz.utc
+
+        offset = int(timezone, 10)
+        if offset == 0:
+            return pytz.utc
+
+        return pytz.FixedOffset(60 * offset)

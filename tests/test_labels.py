@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import datetime
-from dateutil import tz
+import pytz
 
 from pysis import labels
 from pysis.labels.parser import (
@@ -335,28 +335,28 @@ def test_dates():
     assert label['time_s_float'] == datetime.time(12, 0, 45, 457100)
 
     assert isinstance(label['time_tz1'], datetime.time)
-    assert label['time_tz1'] == datetime.time(15, 24, 12, tzinfo=tz.tzutc())
+    assert label['time_tz1'] == datetime.time(15, 24, 12, tzinfo=pytz.utc)
 
     assert isinstance(label['time_tz2'], datetime.time)
-    assert label['time_tz2'] == datetime.time(1, 12, 22, tzinfo=tz.tzoffset(None, 25200))  # noqa
+    assert label['time_tz2'] == datetime.time(1, 12, 22, tzinfo=pytz.FixedOffset(420))  # noqa
 
     assert isinstance(label['time_tz3'], datetime.time)
-    assert label['time_tz3'] == datetime.time(1, 12, 22, tzinfo=tz.tzoffset(None, 25200))  # noqa
+    assert label['time_tz3'] == datetime.time(1, 12, 22, tzinfo=pytz.FixedOffset(420))  # noqa
 
     assert isinstance(label['time_tz4'], datetime.time)
-    assert label['time_tz4'] == datetime.time(1, 10, 39, 457500, tz.tzoffset(None, 25200))  # noqa
+    assert label['time_tz4'] == datetime.time(1, 10, 39, 457500, pytz.FixedOffset(420))  # noqa
 
     assert isinstance(label['datetime1'], datetime.datetime)
     assert label['datetime1'] == datetime.datetime(1990, 07, 04, 12)
 
     assert isinstance(label['datetime2'], datetime.datetime)
-    assert label['datetime2'] == datetime.datetime(1990, 6, 7, 15, 24, 12, tzinfo=tz.tzutc())  # noqa
+    assert label['datetime2'] == datetime.datetime(1990, 6, 7, 15, 24, 12, tzinfo=pytz.utc)  # noqa
 
     assert isinstance(label['datetime3'], datetime.datetime)
-    assert label['datetime3'] == datetime.datetime(2001, 1, 1, 1, 10, 39, tzinfo=tz.tzoffset(None, 25200))  # noqa
+    assert label['datetime3'] == datetime.datetime(2001, 1, 1, 1, 10, 39, tzinfo=pytz.FixedOffset(420))  # noqa
 
     assert isinstance(label['datetime4'], datetime.datetime)
-    assert label['datetime4'] == datetime.datetime(2001, 1, 1, 1, 10, 39, 457591, tz.tzoffset(None, 25200))  # noqa
+    assert label['datetime4'] == datetime.datetime(2001, 1, 1, 1, 10, 39, 457591, pytz.FixedOffset(420))  # noqa
 
 
 def test_set():

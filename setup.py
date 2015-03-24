@@ -29,7 +29,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'numpy',
-        'python-dateutil',
+        'pytz',
     ],
     license='GPLv3',
     zip_safe=False,
