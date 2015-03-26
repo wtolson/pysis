@@ -49,6 +49,31 @@ def test_linewrap():
     assert label['foo'] == 'barbaz'
 
 
+def test_special():
+    label = labels.parse_label("""
+        none1 = NULL
+        none2 = Null
+        true1 = TRUE
+        true2 = True
+        true3 = true
+        false1 = FALSE
+        false2 = False
+        false3 = false
+        End
+    """)
+
+    assert label['none1'] is None
+    assert label['none2'] is None
+
+    assert label['true1'] is True
+    assert label['true2'] is True
+    assert label['true3'] is True
+
+    assert label['false1'] is False
+    assert label['false2'] is False
+    assert label['false3'] is False
+
+
 def test_integers():
     label = labels.parse_label("""
         integer = 42
