@@ -65,7 +65,12 @@ class LabelParser(object):
     eof_chars = (b'', b'\0')
 
     quote_marks = (b'"', b"'")
+    null_tokens = (b'Null', b'NULL')
     end_tokens = (b'End', b'END')
+
+    true_tokens = (b'TRUE', 'True', 'true')
+    false_tokens = (b'FALSE', 'False', 'false')
+    boolean_tokens = true_tokens + false_tokens
 
     begin_group_tokens = (b'Group', b'GROUP', b'BEGIN_GROUP')
     end_group_tokens = (b'End_Group', b'END_GROUP')
@@ -649,6 +654,12 @@ class LabelParser(object):
         return self.cast_unquoated_string(value)
 
     def cast_unquoated_string(self, value):
+        if self.is_null(value):
+            return self.parse_null(value)
+
+        if self.is_boolean(value):
+            return self.parse_boolean(value)
+
         if self.is_integer(value):
             return self.parse_integer(value)
 
@@ -674,6 +685,18 @@ class LabelParser(object):
             return self.parse_datetime_day_of_year(value)
 
         return value.decode('utf-8')
+
+    def is_null(self, value):
+        return value in self.null_tokens
+
+    def parse_null(self, value):
+        return None
+
+    def is_boolean(self, value):
+        return value in self.boolean_tokens
+
+    def parse_boolean(self, value):
+        return value in self.true_tokens
 
     def is_integer(self, value):
         return bool(self.integer_re.match(value))
