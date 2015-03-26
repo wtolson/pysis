@@ -20,12 +20,24 @@ class LabelObject(OrderedMultiDict):
     pass
 
 
-class ParseError(ValueError):
-    pass
-
-
 class Units(collections.namedtuple('Units', ['value', 'units'])):
     pass
+
+
+class ParseError(ValueError):
+    """Subclass of ValueError with the following additional properties:
+    msg: The unformatted error message
+    pos: The start index of where parsing failed
+    lineno: The line corresponding to pos
+    colno: The column corresponding to pos
+    """
+    def __init__(self, msg, pos, lineno, colno):
+        errmsg = '%s: line %d column %d (char %d)' % (msg, lineno, colno, pos)
+        super(ParseError, self).__init__(errmsg)
+        self.msg = msg
+        self.pos = pos
+        self.lineno = lineno
+        self.colno = colno
 
 
 RE_FRAGMENTS = {
@@ -126,6 +138,9 @@ class LabelParser(object):
     def peek(self, stream, n, offset=0):
         return stream.peek(n + offset)[offset:n]
 
+    def raise_error(self, msg, stream):
+        raise ParseError(msg, stream.pos, stream.lineno, stream.colno)
+
     def optional(self, stream, token):
         if not self.has_next(token, stream):
             return
@@ -136,7 +151,7 @@ class LabelParser(object):
         if actual == expected:
             return
         msg = 'Unexpected token %r (expected %r)'
-        raise ParseError(msg % (actual, expected))
+        self.raise_error(msg % (actual, expected), stream)
 
     def expect_in(self, stream, tokens):
         for token in tokens:
@@ -147,10 +162,10 @@ class LabelParser(object):
     def raise_unexpected(self, stream, token=None):
         if token is None:
             token = self.peek(stream, 1)
-        raise ParseError('Unexpected token %r' % token)
+        self.raise_error('Unexpected token %r' % token, stream)
 
-    def raise_unexpected_eof(self):
-        raise ParseError('Unexpected EOF')
+    def raise_unexpected_eof(self, stream):
+        self.raise_error('Unexpected EOF', stream)
 
     def has_eof(self, stream, offset=0):
         return self.peek(stream, 1, offset) in self.eof_chars
@@ -272,7 +287,7 @@ class LabelParser(object):
         while 1:
             next = self.peek(stream, len(self.end_comment))
             if not next:
-                self.raise_unexpected_eof()
+                self.raise_unexpected_eof(stream)
 
             if next == self.end_comment:
                 break
@@ -480,7 +495,7 @@ class LabelParser(object):
 
         while not self.has_next(self.end_units, stream):
             if self.has_eof(stream):
-                self.raise_unexpected_eof()
+                self.raise_unexpected_eof(stream)
             value += stream.read(1)
 
         self.expect(stream, self.end_units)
@@ -554,7 +569,7 @@ class LabelParser(object):
         while not self.has_next(self.radix_symbole, stream):
             next = stream.read(1)
             if not next:
-                self.raise_unexpected_eof()
+                self.raise_unexpected_eof(stream)
 
             if next not in chars:
                 self.raise_unexpected(stream, chars)
@@ -608,7 +623,7 @@ class LabelParser(object):
         while not self.has_next(mark, stream):
             next = stream.read(1)
             if not next:
-                self.raise_unexpected_eof()
+                self.raise_unexpected_eof(stream)
             value += next
 
         self.expect(stream, mark)
