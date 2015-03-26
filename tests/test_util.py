@@ -17,7 +17,7 @@ def test_file_variations():
 
 
 def test_image_name():
-    assert str(ImageName('test')) == 'test'
-    assert str(ImageName('image').IMG) == 'image.IMG'
-    assert str(ImageName('image').cal.cub) == 'image.cal.cub'
-    assert str(ImageName('foo/image.bar').baz) == 'foo/image.bar.baz'
+    assert ImageName('test') == 'test'
+    assert ImageName('image').IMG == 'image.IMG'
+    assert ImageName('image').cal.cub == 'image.cal.cub'
+    assert ImageName('foo/image.bar').baz == 'foo/image.bar.baz'
