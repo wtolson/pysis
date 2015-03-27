@@ -346,7 +346,7 @@ def test_dates():
     """)
 
     assert isinstance(label['date1'], datetime.date)
-    assert label['date1'] == datetime.date(1990, 07, 04)
+    assert label['date1'] == datetime.date(1990, 7, 4)
 
     assert isinstance(label['date2'], datetime.date)
     assert label['date2'] == datetime.date(1990, 6, 7)
@@ -376,7 +376,7 @@ def test_dates():
     assert label['time_tz4'] == datetime.time(1, 10, 39, 457500, pytz.FixedOffset(420))  # noqa
 
     assert isinstance(label['datetime1'], datetime.datetime)
-    assert label['datetime1'] == datetime.datetime(1990, 07, 04, 12)
+    assert label['datetime1'] == datetime.datetime(1990, 7, 4, 12)
 
     assert isinstance(label['datetime2'], datetime.datetime)
     assert label['datetime2'] == datetime.datetime(1990, 6, 7, 15, 24, 12, tzinfo=pytz.utc)  # noqa
