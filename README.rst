@@ -87,13 +87,14 @@ Here is an example of the maptemplate and cam2map commands in Pysis::
 Getting values from ISIS commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here is an example of how to receive values that are returned on STDOUT from
-ISIS tools. The example command we are using is `getkey` to receive values from
-the label of an ISIS cube::
+Pysis commands will return the command's STDOUT as a byte string. If the command
+returns a nonzero exit code, a `ProcessError` will be thrown. This example
+command uses `getkey` to receive values from the label of an ISIS cube::
 
-    value = getkey.check_output(from_='W1467351325_4.map.cal.cub',
-                                keyword='minimumringradius',
-                                grp='mapping')
+    from pysis.isis import getkey
+
+    value = getkey(from_='W1467351325_4.map.cal.cub',
+                   keyword='minimumringradius', grp='mapping')
 
 
 Multiprocessing Isis Commands with IsisPool
