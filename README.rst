@@ -46,7 +46,7 @@ Quickstart Guide
 How to write ISIS 3 code in python using Pysis.
 
 Using ISIS 3 at the command line you might want to run the following basic
-commands (examples for the MDIS camera on the MESSENGER mission):
+commands (examples for the MDIS camera on the MESSENGER mission)::
 
     mdis2isis from=filename.IMG to=filename.cub
     spiceinit from=filename.cub
