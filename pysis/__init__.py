@@ -15,6 +15,7 @@ __all__ = [  # noqa
     'ISIS_VERSION_MINOR',
     'ISIS_VERSION_PATCH',
     'ISIS_VERSION_BUILD',
+    'check_isis_version',
     'require_isis_version',
     'isis',
 ]
@@ -23,12 +24,13 @@ __all__ = [  # noqa
 from .commands import Isis
 from .isispool import IsisPool
 from .cubefile import CubeFile
-from .setup import (
+from .env import (
     ISIS_ROOT,
     ISIS_VERSION,
     ISIS_VERSION_MAJOR,
     ISIS_VERSION_MINOR,
     ISIS_VERSION_PATCH,
     ISIS_VERSION_BUILD,
+    check_isis_version,
     require_isis_version,
 )

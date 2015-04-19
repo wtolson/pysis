@@ -2,6 +2,8 @@
 
 import os
 from os import path
+from functools import wraps
+
 from .exceptions import VersionError
 
 __all__ = [
@@ -19,10 +21,12 @@ try:
     with open(path.join(ISIS_ROOT, 'version')) as _f:
         ISIS_VERSION = _f.readline().strip()
 
+    ISIS_VERISON_TUPLE = tuple(map(int, ISIS_VERSION.split('.')))
+
     (
         ISIS_VERSION_MAJOR, ISIS_VERSION_MINOR,
         ISIS_VERSION_PATCH, ISIS_VERSION_BUILD
-    ) = map(int, ISIS_VERSION.split('.'))
+    ) = ISIS_VERISON_TUPLE
 
 except:
     import warnings
@@ -55,19 +59,30 @@ if ISIS_VERSION_MAJOR == 3:
     QT_PLUGIN_PATH = path.join(ISIS_ROOT, '3rdParty/plugins')
     os.environ['QT_PLUGIN_PATH'] = QT_PLUGIN_PATH
 
+else:
+    ISIS_DATA = None
+    ISIS_TEST_DATA = None
+    ISIS_PATH = None
+    QT_PLUGIN_PATH = None
 
-def require_isis_version(major, minor=None, patch=None, build=None):
-    err_msg = 'Version %s.%s.%s.%s of isis required (%s found).'
-    err = VersionError(err_msg % (major, minor, patch, build, ISIS_VERSION))
 
-    if major != ISIS_VERSION_MAJOR:
-        raise err
+def check_isis_version(major, minor=0, patch=0, build=0):
+    """Checks that the current isis version is equal to or above the suplied
+    version."""
+    if ISIS_VERSION and (major, minor, patch, build) <= ISIS_VERISON_TUPLE:
+        return
 
-    if minor is not None and minor != ISIS_VERSION_MINOR:
-        raise err
+    msg = 'Version %s.%s.%s.%s of isis required (%s found).'
+    raise VersionError(msg % (major, minor, patch, build, ISIS_VERSION))
 
-    if patch is not None and patch != ISIS_VERSION_PATCH:
-        raise err
 
-    if build is not None and build != ISIS_VERSION_BUILD:
-        raise err
+def require_isis_version(major, minor=0, patch=0, build=0):
+    """Decorator that ensures a function is called with a minimum isis version.
+    """
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            check_isis_version(major, minor, patch, build)
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
