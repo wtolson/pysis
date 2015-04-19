@@ -7,23 +7,24 @@ Subpackages
 .. toctree::
 
     pysis.binning
+    pysis.labels
     pysis.util
 
 Submodules
 ----------
 
-pysis.commands module
----------------------
-
-.. automodule:: pysis.commands
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 pysis.cubefile module
 ---------------------
 
 .. automodule:: pysis.cubefile
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+pysis.env module
+----------------
+
+.. automodule:: pysis.env
     :members:
     :undoc-members:
     :show-inheritance:
@@ -44,26 +45,18 @@ pysis.isis module
     :undoc-members:
     :show-inheritance:
 
+pysis.isiscommand module
+------------------------
+
+.. automodule:: pysis.isiscommand
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pysis.isispool module
 ---------------------
 
 .. automodule:: pysis.isispool
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pysis.labels module
--------------------
-
-.. automodule:: pysis.labels
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pysis.setup module
-------------------
-
-.. automodule:: pysis.setup
     :members:
     :undoc-members:
     :show-inheritance:
