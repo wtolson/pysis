@@ -63,22 +63,22 @@ SPECIAL_PIXELS = {
     },
 
     'Real': {
-        'Min': _make_num('\xFF\x7F\xFF\xFA', '>f4'),
-        'Null': _make_num('\xFF\x7F\xFF\xFB', '>f4'),
-        'Lrs': _make_num('\xFF\x7F\xFF\xFC', '>f4'),
-        'Lis': _make_num('\xFF\x7F\xFF\xFD', '>f4'),
-        'His': _make_num('\xFF\x7F\xFF\xFE', '>f4'),
-        'Hrs': _make_num('\xFF\x7F\xFF\xFF', '>f4'),
+        'Min': _make_num(b'\xFF\x7F\xFF\xFA', '>f4'),
+        'Null': _make_num(b'\xFF\x7F\xFF\xFB', '>f4'),
+        'Lrs': _make_num(b'\xFF\x7F\xFF\xFC', '>f4'),
+        'Lis': _make_num(b'\xFF\x7F\xFF\xFD', '>f4'),
+        'His': _make_num(b'\xFF\x7F\xFF\xFE', '>f4'),
+        'Hrs': _make_num(b'\xFF\x7F\xFF\xFF', '>f4'),
         'Max': numpy.finfo('f4').max
     },
 
     'Double': {
-        'Min': _make_num('\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFA', '>f8'),
-        'Null': _make_num('\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFB', '>f8'),
-        'Lrs': _make_num('\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFC', '>f8'),
-        'Lis': _make_num('\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFD', '>f8'),
-        'His': _make_num('\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFE', '>f8'),
-        'Hrs': _make_num('\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFF', '>f8'),
+        'Min': _make_num(b'\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFA', '>f8'),
+        'Null': _make_num(b'\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFB', '>f8'),
+        'Lrs': _make_num(b'\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFC', '>f8'),
+        'Lis': _make_num(b'\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFD', '>f8'),
+        'His': _make_num(b'\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFE', '>f8'),
+        'Hrs': _make_num(b'\xFF\xEF\xFF\xFF\xFF\xFF\xFF\xFF', '>f8'),
         'Max': numpy.finfo('f8').max
     }
 }
