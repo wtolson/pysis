@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-
 from multiprocessing import Pool
-from subprocess import check_output
 from .command import Isis, IsisCommand
 
 
@@ -12,12 +10,12 @@ __all__ = [
 
 
 class QueuedIsisCommand(IsisCommand):
-    def __init__(self, name, queue):
-        self.queue = queue
+    def __init__(self, name, pool):
+        self._pool = pool
         super(QueuedIsisCommand, self).__init__(name)
 
-    def __call__(self, **kwargs):
-        return self.queue.apply_async(check_output, [self.get_cmd(**kwargs)])
+    def __call__(self, **kwds):
+        return self._pool.apply_async(IsisCommand(self.name), kwds=kwds)
 
 
 class IsisPool(Isis):
@@ -61,30 +59,28 @@ class IsisPool(Isis):
     """
 
     def __init__(self, strict=False, *args, **kwargs):
-        self.pool = Pool(*args, **kwargs)
-        self._strict = strict
+        self._pool = Pool(*args, **kwargs)
+        super(IsisPool, self).__init__(strict=strict)
 
-        if self._strict:
-            for name, cmd in self._get_commands():
-                cmd = QueuedIsisCommand(cmd)
-                setattr(self, name, cmd)
+    def _add_command(self, name, cmd):
+        setattr(self, name, QueuedIsisCommand(cmd, self._pool))
 
     def __getattr__(self, name):
-        if hasattr(self.pool, name):
-            return getattr(self.pool, name)
-
-        if self._strict:
-            raise AttributeError("No isis command for '%s'" % name)
-
-        return QueuedIsisCommand(name, self)
+        return QueuedIsisCommand(name, self._pool)
 
     def close_and_wait(self):
         """Close the pool and wait for all commands to complete.
 
         This will be automatically called if used as a context manager.
         """
-        self.pool.close()
-        self.pool.join()
+        self.close()
+        self.join()
+
+    def close(self, *args, **kwarg):
+        self._pool.close(*args, **kwarg)
+
+    def join(self, *args, **kwarg):
+        self._pool.join(*args, **kwarg)
 
     def __enter__(self):
         return self
