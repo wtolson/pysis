@@ -13,7 +13,7 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='pysis',
-    version='0.4.0',
+    version='0.5.0',
     description='Toolkit for using USGS Isis in Python.',
     long_description=readme + '\n\n' + history,
     author='Trevor Olson',
