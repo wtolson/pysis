@@ -11,4 +11,4 @@ __all__ = [
 ]
 
 
-from file_manipulation import write_file_list, file_variations, ImageName
+from .file_manipulation import write_file_list, file_variations, ImageName
