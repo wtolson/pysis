@@ -2,9 +2,8 @@
 
 from multiprocessing import Pool
 from subprocess import check_output
+from .command import Isis, IsisCommand
 
-from .commands import Isis
-from .commands import IsisCommand
 
 __all__ = [
     'IsisPool',
