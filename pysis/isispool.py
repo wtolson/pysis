@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from multiprocessing import Pool
-from .command import Isis, IsisCommand
+from .isiscommand import Isis, IsisCommand
 
 
 __all__ = [

@@ -21,7 +21,7 @@ __all__ = [  # noqa
 ]
 
 
-from .command import Isis
+from .isiscommand import Isis
 from .isispool import IsisPool
 from .cubefile import CubeFile
 from .env import (

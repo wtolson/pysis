@@ -3,7 +3,7 @@ import sys
 import types
 
 from .env import ISIS_VERSION
-from .command import Isis
+from .isiscommand import Isis
 
 
 class ModuleWrapper(Isis, types.ModuleType):

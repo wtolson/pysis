@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from pysis.command import Isis
+from pysis import Isis
 from pysis.exceptions import ProcessError
 
 
