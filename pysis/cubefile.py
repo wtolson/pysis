@@ -33,7 +33,7 @@ class CubeFile(object):
 
         :param filename: name of file to read as an isis file
         """
-        with open(filename) as fp:
+        with open(filename, 'rb') as fp:
             return cls(fp, filename)
 
     def __init__(self, stream, filename=None):
