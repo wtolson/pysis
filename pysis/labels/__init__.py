@@ -1,5 +1,4 @@
 import io
-import functools
 import warnings
 import six
 
@@ -41,13 +40,19 @@ def dumps(label):
     return stream.getvalue()
 
 
-@functools.wraps(load)
 def parse_file_label(stream):
+    load.__doc__ + """
+    deprecated:: 0.4.0
+    Use load instead.
+    """
     warnings.warn('parse_file_label is deprecated. use load instead.')
     return load(stream)
 
 
-@functools.wraps(loads)
 def parse_label(data, encoding='utf-8'):
-    warnings.warn('parse_label is deprecated. use load instead.')
+    loads.__doc__ + """
+    deprecated:: 0.4.0
+    Use loads instead.
+    """
+    warnings.warn('parse_label is deprecated. use loads instead.')
     return loads(data, encoding='utf-8')
