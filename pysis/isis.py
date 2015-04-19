@@ -23,6 +23,12 @@ class ModuleWrapper(Isis, types.ModuleType):
 
         super(ModuleWrapper, self).__init__(**kwargs)
 
+    def __getattr__(self, name):
+        try:
+            return getattr(self.__self_module, name)
+        except AttributeError:
+            return super(Isis, self).__getattr__(name)
+
     def _add_command(self, name, cmd):
         super(ModuleWrapper, self)._add_command(name, cmd)
         self.__all__.append(name)
