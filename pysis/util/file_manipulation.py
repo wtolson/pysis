@@ -40,7 +40,7 @@ def file_variations(filename, extensions):
     return [label + extention for extention in extensions]
 
 
-class ImageName(unicode):
+class ImageName(str):
     def __getattr__(self, name):
         return ImageName(self + '.' + name)
 

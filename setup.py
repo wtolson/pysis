@@ -30,6 +30,7 @@ setup(
     install_requires=[
         'numpy',
         'pytz',
+        'six',
     ],
     license='GPLv3',
     zip_safe=False,

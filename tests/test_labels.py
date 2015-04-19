@@ -2,6 +2,7 @@
 import os
 import datetime
 import pytz
+import six
 
 from pysis import labels
 from pysis.labels.parser import (
@@ -92,7 +93,7 @@ def test_integers():
     assert isinstance(label['negitive_integer'], int)
     assert label['negitive_integer'] == -1
 
-    assert isinstance(label['invalid_integer'], unicode)
+    assert isinstance(label['invalid_integer'], six.text_type)
     assert label['invalid_integer'] == '1a2'
 
 
@@ -125,7 +126,7 @@ def test_floats():
     assert isinstance(label['negative_float'], float)
     assert label['negative_float'] == -1.0
 
-    assert isinstance(label['invalid_float'], unicode)
+    assert isinstance(label['invalid_float'], six.text_type)
     assert label['invalid_float'] == '1.2.3'
 
 
@@ -280,34 +281,34 @@ def test_quotes():
         End
     """)
 
-    assert isinstance(label['foo'], unicode)
+    assert isinstance(label['foo'], six.text_type)
     assert label['foo'] == 'bar'
 
-    assert isinstance(label['empty'], unicode)
+    assert isinstance(label['empty'], six.text_type)
     assert label['empty'] == ''
 
-    assert isinstance(label['space'], unicode)
+    assert isinstance(label['space'], six.text_type)
     assert label['space'] == 'test'
 
-    assert isinstance(label['double'], unicode)
+    assert isinstance(label['double'], six.text_type)
     assert label['double'] == "double'quotes"
 
-    assert isinstance(label['single'], unicode)
+    assert isinstance(label['single'], six.text_type)
     assert label['single'] == 'single"quotes'
 
-    assert isinstance(label['number'], unicode)
+    assert isinstance(label['number'], six.text_type)
     assert label['number'] == '123'
 
-    assert isinstance(label['date'], unicode)
+    assert isinstance(label['date'], six.text_type)
     assert label['date'] == '1918-05-11'
 
-    assert isinstance(label['multiline'], unicode)
+    assert isinstance(label['multiline'], six.text_type)
     assert label['multiline'] == 'this is a multi-line string'
 
-    assert isinstance(label['continuation'], unicode)
+    assert isinstance(label['continuation'], six.text_type)
     assert label['continuation'] == 'The planet Jupiter is very big'
 
-    assert isinstance(label['formating'], unicode)
+    assert isinstance(label['formating'], six.text_type)
     assert label['formating'] == '\n\t\f\v\\\n\t\f\v\\'
 
 
@@ -319,10 +320,10 @@ def test_comments():
         End
     """)
 
-    assert isinstance(label['foo'], unicode)
+    assert isinstance(label['foo'], six.text_type)
     assert label['foo'] == 'bar'
 
-    assert isinstance(label['foo'], unicode)
+    assert isinstance(label['foo'], six.text_type)
     assert label['weird'] == 'comments'
 
 
@@ -533,7 +534,7 @@ def test_delimiters():
 
 
 def test_cube_label():
-    with open(os.path.join(DATA_DIR, 'pattern.cub')) as fp:
+    with open(os.path.join(DATA_DIR, 'pattern.cub'), 'rb') as fp:
         label = labels.parse_file_label(fp)
 
     assert isinstance(label['Label'], dict)

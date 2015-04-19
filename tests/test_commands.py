@@ -1,33 +1,30 @@
 # -*- coding: utf-8 -*-
 import pytest
-import subprocess
-from pysis.commands import Isis
+
+from pysis.command import Isis
+from pysis.exceptions import ProcessError
 
 
 def test_true():
     isis = Isis(strict=True)
-    assert isis.isis_true() == 0
-    assert isis.isis_true.check_output() == ''
+    assert isis.isis_true() == b''
 
 
 def test_false():
     isis = Isis(strict=True)
-    assert isis.isis_false() == 1
-
-    with pytest.raises(subprocess.CalledProcessError):
-        isis.isis_false.check_output()
+    with pytest.raises(ProcessError):
+        isis.isis_false()
 
 
 def test_echo():
     isis = Isis(strict=True)
-    assert isis.isis_echo(foo='bar') == 0
-    assert isis.isis_echo.check_output() == '\n'
-    assert isis.isis_echo.check_output(from_='to') == 'from=to\n'
+    assert isis.isis_echo() == b'\n'
+    assert isis.isis_echo(from_='to') == b'from=to\n'
 
-    output = isis.isis_echo.check_output(foo='bar', baz='bang').split()
+    output = isis.isis_echo(foo='bar', baz='bang').split()
     assert len(output) == 2
-    assert 'foo=bar' in output
-    assert 'baz=bang' in output
+    assert b'foo=bar' in output
+    assert b'baz=bang' in output
 
 
 def test_strict():
@@ -38,5 +35,14 @@ def test_strict():
 
 def test_lazy():
     isis = Isis(strict=False)
-    assert isis.isis_true() == 0
-    assert isis.isis_false() == 1
+    assert isis.isis_true() == b''
+    with pytest.raises(ProcessError):
+        isis.isis_false()
+
+
+def test_isis_module():
+    from pysis import isis
+    assert isis.isis_true() == b''
+
+    from pysis.isis import isis_true
+    assert isis_true() == b''
