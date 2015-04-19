@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy
-from .labels import parse_file_label
+from .labels import load as load_label
 from .specialpixels import SPECIAL_PIXELS
 
 
@@ -220,7 +220,7 @@ class CubeFile(object):
         return self.bands * self.lines * self.samples
 
     def _parse_label(self, stream):
-        return parse_file_label(stream)
+        return load_label(stream)
 
     def _parse_data(self, stream):
         stream.seek(self.start_byte)

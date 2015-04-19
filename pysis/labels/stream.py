@@ -32,10 +32,10 @@ class BufferedStream(StreamBase):
     def _update_pos(self, data):
         self._pos += len(data)
 
-        lines = data.count('\n')
+        lines = data.count(b'\n')
         if lines:
             self._lineno += lines
-            self._colno = len(data) - data.rfind('\n')
+            self._colno = len(data) - data.rfind(b'\n')
         else:
             self._colno += len(data)
 
@@ -107,11 +107,11 @@ class ByteStream(StreamBase):
 
     @property
     def lineno(self):
-        return self.raw.count('\n', 0, self._read_pos) + 1
+        return self.raw.count(b'\n', 0, self._read_pos) + 1
 
     @property
     def colno(self):
-        return self._read_pos - self.raw.rfind('\n', 0, self._read_pos)
+        return self._read_pos - self.raw.rfind(b'\n', 0, self._read_pos)
 
     def read(self, n):
         """Read n bytes.

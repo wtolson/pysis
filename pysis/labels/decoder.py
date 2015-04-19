@@ -1,27 +1,12 @@
+from six import b
+
 import re
 import itertools
-import collections
 import datetime
 import pytz
 
 from .stream import BufferedStream, ByteStream
-from ._collections import OrderedMultiDict
-
-
-class Label(OrderedMultiDict):
-    pass
-
-
-class LabelGroup(OrderedMultiDict):
-    pass
-
-
-class LabelObject(OrderedMultiDict):
-    pass
-
-
-class Units(collections.namedtuple('Units', ['value', 'units'])):
-    pass
+from ._collections import Label, LabelGroup, LabelObject, Units
 
 
 class ParseError(ValueError):
@@ -69,10 +54,14 @@ DATETIME_MONTH_DAY_RE = r'^%(date_month_day)sT%(time)s$' % RE_FRAGMENTS
 DATETIME_DAY_OF_YEAR_RE = r'^%(date_day_of_year)sT%(time)s$' % RE_FRAGMENTS
 
 
-class LabelParser(object):
-    whitespace = set(b' \r\n\t\v\f')
-    newline_chars = set(b'\r\n')
-    reserved_chars = set(b'&<>\'{},[]=!#()%";|')
+def char_set(chars):
+    return set([b(c) for c in chars])
+
+
+class LabelDecoder(object):
+    whitespace = char_set(' \r\n\t\v\f')
+    newline_chars = char_set('\r\n')
+    reserved_chars = char_set('&<>\'{},[]=!#()%";|')
     delimiter_chars = whitespace | reserved_chars
     eof_chars = (b'', b'\0')
 
@@ -80,8 +69,8 @@ class LabelParser(object):
     null_tokens = (b'Null', b'NULL')
     end_tokens = (b'End', b'END')
 
-    true_tokens = (b'TRUE', 'True', 'true')
-    false_tokens = (b'FALSE', 'False', 'false')
+    true_tokens = (b'TRUE', b'True', b'true')
+    false_tokens = (b'FALSE', b'False', b'false')
     boolean_tokens = true_tokens + false_tokens
 
     begin_group_tokens = (b'Group', b'GROUP', b'BEGIN_GROUP')
@@ -113,26 +102,26 @@ class LabelParser(object):
     signs = set([plus_sign, minus_sign])
 
     binary_chars = (b'0', b'1')
-    octal_chars = set(b'01234567')
-    decimal_chars = set(b'0123456789')
-    hex_chars = set(b'0123456789ABCDEFabcdef')
+    octal_chars = char_set('01234567')
+    decimal_chars = char_set('0123456789')
+    hex_chars = char_set('0123456789ABCDEFabcdef')
 
-    integer_re = re.compile(INTEGER_RE)
-    float_re = re.compile(FLOAT_RE)
-    exponent_re = re.compile(EXPONENT_RE)
-    line_continuation_re = re.compile(LINE_CONTINUATION_RE)
-    time_re = re.compile(TIME_RE)
-    date_month_day_re = re.compile(DATE_MONTH_DAY_RE)
-    date_day_of_year_re = re.compile(DATE_DAY_OF_YEAR_RE)
-    datetime_month_day_re = re.compile(DATETIME_MONTH_DAY_RE)
-    datetime_day_of_year_re = re.compile(DATETIME_DAY_OF_YEAR_RE)
+    integer_re = re.compile(b(INTEGER_RE))
+    float_re = re.compile(b(FLOAT_RE))
+    exponent_re = re.compile(b(EXPONENT_RE))
+    line_continuation_re = re.compile(b(LINE_CONTINUATION_RE))
+    time_re = re.compile(b(TIME_RE))
+    date_month_day_re = re.compile(b(DATE_MONTH_DAY_RE))
+    date_day_of_year_re = re.compile(b(DATE_DAY_OF_YEAR_RE))
+    datetime_month_day_re = re.compile(b(DATETIME_MONTH_DAY_RE))
+    datetime_day_of_year_re = re.compile(b(DATETIME_DAY_OF_YEAR_RE))
 
     formatting_chars = {
-        r'\n': '\n',
-        r'\t': '\t',
-        r'\f': '\f',
-        r'\v': '\v',
-        r'\\': '\\',
+        b'\\n': b'\n',
+        b'\\t': b'\t',
+        b'\\f': b'\f',
+        b'\\v': b'\v',
+        b'\\\\': b'\\',
     }
 
     def peek(self, stream, n, offset=0):
@@ -206,7 +195,7 @@ class LabelParser(object):
                 break
         return self.peek(stream, offset)
 
-    def parse(self, stream):
+    def decode(self, stream):
         if isinstance(stream, bytes):
             stream = ByteStream(stream)
         else:
@@ -364,7 +353,7 @@ class LabelParser(object):
         self.parse_end_assignment(stream, name)
         self.skip_statement_delimiter(stream)
 
-        return name, LabelGroup(statements)
+        return name.decode('utf-8'), LabelGroup(statements)
 
     def has_end_group(self, stream):
         """
@@ -395,7 +384,7 @@ class LabelParser(object):
         self.parse_end_assignment(stream, name)
         self.skip_statement_delimiter(stream)
 
-        return name, LabelObject(statements)
+        return name.decode('utf-8'), LabelObject(statements)
 
     def has_end_object(self, stream):
         """
@@ -420,7 +409,7 @@ class LabelParser(object):
         self.ensure_assignment(stream)
         value = self.parse_value(stream)
         self.skip_statement_delimiter(stream)
-        return name, value
+        return name.decode('utf-8'), value
 
     def parse_value(self, stream):
         """
@@ -499,7 +488,7 @@ class LabelParser(object):
             value += stream.read(1)
 
         self.expect(stream, self.end_units)
-        return value.strip(''.join(self.whitespace))
+        return value.strip(b''.join(self.whitespace)).decode('utf-8')
 
     def parse_simple_value(self, stream):
         """
@@ -534,7 +523,7 @@ class LabelParser(object):
         self.raise_unexpected(stream)
 
     def has_radix(self, radix, stream):
-        prefix = str(radix) + self.radix_symbole
+        prefix = b(str(radix)) + self.radix_symbole
         if self.has_next(prefix, stream):
             return True
 
@@ -563,7 +552,7 @@ class LabelParser(object):
         """
         value = b''
         sign = self.parse_sign(stream)
-        self.expect(stream, str(radix) + self.radix_symbole)
+        self.expect(stream, b(str(radix)) + self.radix_symbole)
         sign *= self.parse_sign(stream)
 
         while not self.has_next(self.radix_symbole, stream):
@@ -630,8 +619,8 @@ class LabelParser(object):
         return self.format_quoated_string(value)
 
     def format_quoated_string(self, value):
-        value = self.line_continuation_re.sub('', value)
-        value = ' '.join(value.split()).strip()
+        value = self.line_continuation_re.sub(b'', value)
+        value = b' '.join(value.split()).strip()
 
         for escape, char in self.formatting_chars.items():
             value = value.replace(escape, char)
@@ -738,7 +727,7 @@ class LabelParser(object):
         match = self.time_re.match(value)
         hour, minute, second, microsecond, timezone = match.groups()
         second = second or '0'
-        microsecond = (microsecond or '0').ljust(6, '0')[:6]
+        microsecond = (microsecond or b'0').ljust(6, b'0')[:6]
         return datetime.time(
             hour=int(hour, 10),
             minute=int(minute, 10),
@@ -771,7 +760,7 @@ class LabelParser(object):
         return bool(self.datetime_month_day_re.match(value))
 
     def parse_datetime_month_day(self, value):
-        date, time = value.split('T')
+        date, time = value.split(b'T')
         return datetime.datetime.combine(
             self.parse_date_month_day(date),
             self.parse_time(time),
@@ -781,7 +770,7 @@ class LabelParser(object):
         return bool(self.datetime_day_of_year_re.match(value))
 
     def parse_datetime_day_of_year(self, value):
-        date, time = value.split('T')
+        date, time = value.split(b'T')
         return datetime.datetime.combine(
             self.parse_date_day_of_year(date),
             self.parse_time(time),
@@ -791,7 +780,7 @@ class LabelParser(object):
         if not timezone:
             return None
 
-        if timezone.upper() == 'Z':
+        if timezone.upper() == b'Z':
             return pytz.utc
 
         offset = int(timezone, 10)

@@ -1,57 +1,53 @@
 import io
-from .parser import LabelParser
+import functools
+import warnings
+import six
+
+from .decoder import LabelDecoder
+from .encoder import LabelEncoder
 
 
-def get_label(stream, buffer_size=io.DEFAULT_BUFFER_SIZE):
-    """Extract the label string from an isis file.
+def load(stream):
+    """Parse an isis label from a stream.
 
-    :param stream: ff stream is a string it will be treated as a filename
-        otherwise it will be treated as if it were a file object
-
-    :param buffer_size: the chunksize to read the label in by
-
-    :returns: the label of the isis file as a string
+    :param stream: a ``.read()``-supporting file-like object containing a label.
+        if ``stream`` is a string it will be treated as a filename
     """
-    if isinstance(stream, basestring):
+    if isinstance(stream, six.string_types):
         with open(stream, 'rb') as fp:
-            return get_label(fp)
-
-    label = b''
-
-    while 1:
-        data = stream.read(buffer_size)
-        if not data:
-            break
-
-        label_end = data.find('\0')
-        if label_end == -1:
-            label += data
-            continue
-
-        label += data[:label_end]
-
-    return label
+            return LabelDecoder().decode(fp)
+    return LabelDecoder().decode(stream)
 
 
-def parse_label(label):
+def loads(data, encoding='utf-8'):
     """Parse an isis label from a string.
 
-    :param label: an isis label as a string
+    :param data: an isis label as a string
 
     :returns: a dictionary representation of the given isis label
     """
-    return LabelParser().parse(label)
+    if not isinstance(data, bytes):
+        data = data.encode(encoding)
+    return LabelDecoder().decode(data)
 
 
+def dump(label, stream):
+    LabelEncoder().encode(label, stream)
+
+
+def dumps(label):
+    stream = io.BytesIO()
+    LabelEncoder().encode(label, stream)
+    return stream.getvalue()
+
+
+@functools.wraps(load)
 def parse_file_label(stream):
-    """Parse an isis label from a stream.
+    warnings.warn('parse_file_label is deprecated. use load instead.')
+    return load(stream)
 
-    :param stream: if stream is a string it will be treated as a filename
-        otherwise it will be treated as if it were a file object
 
-    :returns: a dictionary representation of the given isis label.
-    """
-    if isinstance(stream, basestring):
-        with open(stream, 'rb') as fp:
-            return LabelParser().parse(fp)
-    return LabelParser().parse(stream)
+@functools.wraps(loads)
+def parse_label(data, encoding='utf-8'):
+    warnings.warn('parse_label is deprecated. use load instead.')
+    return loads(data, encoding='utf-8')

@@ -5,7 +5,7 @@ import pytz
 import six
 
 from pysis import labels
-from pysis.labels.parser import (
+from pysis.labels._collections import (
     Label,
     LabelGroup,
     LabelObject,
@@ -17,13 +17,13 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), 'data/')
 
 
 def test_assignment():
-    label = labels.parse_label('foo=bar')
+    label = labels.loads('foo=bar')
     assert isinstance(label, Label)
     assert label['foo'] == 'bar'
 
 
 def test_spaceing():
-    label = labels.parse_label("""
+    label = labels.loads("""
         foo = bar
         nospace=good
           lots_of_spaceing    =    alsogood
@@ -41,7 +41,7 @@ def test_spaceing():
 
 
 def test_linewrap():
-    label = labels.parse_label("""
+    label = labels.loads("""
         foo = bar-
               baz
         End
@@ -51,7 +51,7 @@ def test_linewrap():
 
 
 def test_special():
-    label = labels.parse_label("""
+    label = labels.loads("""
         none1 = NULL
         none2 = Null
         true1 = TRUE
@@ -76,7 +76,7 @@ def test_special():
 
 
 def test_integers():
-    label = labels.parse_label("""
+    label = labels.loads("""
         integer = 42
         positive_integer = +123
         negitive_integer = -1
@@ -98,7 +98,7 @@ def test_integers():
 
 
 def test_floats():
-    label = labels.parse_label("""
+    label = labels.loads("""
         float = 1.0
         float_no_decimal = 2.
         float_no_whole = .3
@@ -130,8 +130,34 @@ def test_floats():
     assert label['invalid_float'] == '1.2.3'
 
 
+def test_exponents():
+    label = labels.loads("""
+        capital = -1.E-3
+        lower = -1.e-3
+        small = -0.45e6
+        int = 31459e1
+        invalid = 1e
+        End
+    """)
+
+    assert isinstance(label['capital'], float)
+    assert label['capital'] == -1.0E-3
+
+    assert isinstance(label['lower'], float)
+    assert label['lower'] == -1.0E-3
+
+    assert isinstance(label['small'], float)
+    assert label['small'] == -0.45E6
+
+    assert isinstance(label['int'], float)
+    assert label['int'] == 31459e1
+
+    assert isinstance(label['invalid'], six.text_type)
+    assert label['invalid'] == '1e'
+
+
 def test_objects():
-    label = labels.parse_label("""
+    label = labels.loads("""
         Object = test_object
           foo = bar
 
@@ -159,7 +185,7 @@ def test_objects():
 
 
 def test_groups():
-    label = labels.parse_label("""
+    label = labels.loads("""
         Group = test_group
           foo = bar
           Object = embedded_object
@@ -186,7 +212,7 @@ def test_groups():
 
 
 def test_alt_group_style():
-    label = labels.parse_label("""
+    label = labels.loads("""
         OBJECT               = TEST1
           FOO                = BAR
         END_OBJECT           = TEST1
@@ -207,7 +233,7 @@ def test_alt_group_style():
 
 
 def test_binary():
-    label = labels.parse_label("""
+    label = labels.loads("""
         binary_number = 2#0101#
         positive_binary_number = +2#0101#
         negative_binary_number = -2#0101#
@@ -225,7 +251,7 @@ def test_binary():
 
 
 def test_octal():
-    label = labels.parse_label("""
+    label = labels.loads("""
         octal_number = 8#0107#
         positive_octal_number = +8#0107#
         negative_octal_number = -8#0107#
@@ -243,7 +269,7 @@ def test_octal():
 
 
 def test_hex():
-    label = labels.parse_label("""
+    label = labels.loads("""
         hex_number_upper = 16#100A#
         hex_number_lower = 16#100b#
         positive_hex_number = +16#100A#
@@ -265,7 +291,7 @@ def test_hex():
 
 
 def test_quotes():
-    label = labels.parse_label("""
+    label = labels.loads("""
         foo = 'bar'
         empty = ''
         space = '  test  '
@@ -313,7 +339,7 @@ def test_quotes():
 
 
 def test_comments():
-    label = labels.parse_label("""
+    label = labels.loads("""
         /* comment on line */
         foo = bar /* comment at end of line */
         weird/* in the */=/*middle*/comments
@@ -328,7 +354,7 @@ def test_comments():
 
 
 def test_dates():
-    label = labels.parse_label("""
+    label = labels.loads("""
         date1          = 1990-07-04
         date2          = 1990-158
         date3          = 2001-001
@@ -390,7 +416,7 @@ def test_dates():
 
 
 def test_set():
-    label = labels.parse_label("""
+    label = labels.loads("""
         strings = {a, b, c}
         nospace={a,b,c}
         numbers = {1, 2, 3}
@@ -437,7 +463,7 @@ def test_set():
 
 
 def test_sequence():
-    label = labels.parse_label("""
+    label = labels.loads("""
         strings = (a, b, c)
         nospace=(a,b,c)
         numbers = (1, 2, 3)
@@ -484,7 +510,7 @@ def test_sequence():
 
 
 def test_units():
-    label = labels.parse_label("""
+    label = labels.loads("""
         foo = 42 <beards>
         g = 9.8 <m/s>
         list = (1, 2, 3) <numbers>
@@ -510,7 +536,7 @@ def test_units():
 
 
 def test_delimiters():
-    label = labels.parse_label("""
+    label = labels.loads("""
         foo = 1;
         Object = embedded_object;
           foo = bar;
@@ -535,7 +561,7 @@ def test_delimiters():
 
 def test_cube_label():
     with open(os.path.join(DATA_DIR, 'pattern.cub'), 'rb') as fp:
-        label = labels.parse_file_label(fp)
+        label = labels.load(fp)
 
     assert isinstance(label['Label'], dict)
     assert label['Label']['Bytes'] == 65536

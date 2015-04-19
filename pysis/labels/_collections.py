@@ -1,6 +1,6 @@
 import sys
 import pprint
-from collections import Mapping, MutableMapping
+from collections import Mapping, MutableMapping, namedtuple
 
 
 PY3 = sys.version_info[0] == 3
@@ -129,3 +129,19 @@ class OrderedMultiDict(dict, MutableMapping):
 
         def iteritems(self):
             return iter(self.__items)
+
+
+class Label(OrderedMultiDict):
+    pass
+
+
+class LabelGroup(OrderedMultiDict):
+    pass
+
+
+class LabelObject(OrderedMultiDict):
+    pass
+
+
+class Units(namedtuple('Units', ['value', 'units'])):
+    pass
