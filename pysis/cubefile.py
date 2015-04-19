@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy
+from six.moves import range
+
 from .labels import load as load_label
 from .specialpixels import SPECIAL_PIXELS
 
@@ -242,8 +244,8 @@ class CubeFile(object):
         tile_samples = self.tile_samples
         tile_size = tile_lines * tile_samples
 
-        lines = xrange(0, self.lines, self.tile_lines)
-        samples = xrange(0, self.samples, self.tile_samples)
+        lines = range(0, self.lines, self.tile_lines)
+        samples = range(0, self.samples, self.tile_samples)
 
         dtype = self.dtype
         data = numpy.empty(self.shape, dtype=dtype)
