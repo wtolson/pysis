@@ -5,8 +5,8 @@ Pysis
 .. image:: https://badge.fury.io/py/pysis.svg
     :target: http://badge.fury.io/py/pysis
 
-.. image:: https://travis-ci.org/wtolson/Pysis.svg?branch=master
-        :target: https://travis-ci.org/wtolson/Pysis
+.. image:: https://travis-ci.org/wtolson/pysis.svg?branch=master
+        :target: https://travis-ci.org/wtolson/pysis
 
 .. image:: https://pypip.in/d/pysis/badge.png
         :target: https://pypi.python.org/pypi/pysis
