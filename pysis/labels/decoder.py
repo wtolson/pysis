@@ -87,6 +87,7 @@ class LabelDecoder(object):
 
     begin_comment = b'/*'
     end_comment = b'*/'
+    line_comment = b'#'
 
     begin_sequence = b'('
     end_sequence = b')'
@@ -269,20 +270,34 @@ class LabelDecoder(object):
         while self.peek(stream, 1) in self.whitespace:
             stream.read(1)
 
-    def has_comment(self, stream, offset=0):
+    def has_multiline_comment(self, stream, offset=0):
         return self.has_next(self.begin_comment, stream, offset)
 
+    def has_line_comment(self, stream, offset=0):
+        return self.has_next(self.line_comment, stream, offset)
+
+    def has_comment(self, stream, offset=0):
+        return (
+            self.has_line_comment(stream, offset) or
+            self.has_multiline_comment(stream, offset)
+        )
+
     def skip_comment(self, stream):
+        if self.has_line_comment(stream):
+            end_comment = b'\n'
+        else:
+            end_comment = self.end_comment
+
         while 1:
-            next = self.peek(stream, len(self.end_comment))
+            next = self.peek(stream, len(end_comment))
             if not next:
                 self.raise_unexpected_eof(stream)
 
-            if next == self.end_comment:
+            if next == end_comment:
                 break
 
             stream.read(1)
-        stream.read(len(self.end_comment))
+        stream.read(len(end_comment))
 
     def has_end(self, stream):
         """
