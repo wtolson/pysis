@@ -341,16 +341,25 @@ def test_quotes():
 def test_comments():
     label = labels.loads("""
         /* comment on line */
+        # here is a line comment
+        /* here is a multi-
+        line comment */
         foo = bar /* comment at end of line */
         weird/* in the */=/*middle*/comments
+        baz = bang # end line comment
         End
     """)
+
+    assert len(label) == 3
 
     assert isinstance(label['foo'], six.text_type)
     assert label['foo'] == 'bar'
 
     assert isinstance(label['foo'], six.text_type)
     assert label['weird'] == 'comments'
+
+    assert isinstance(label['foo'], six.text_type)
+    assert label['baz'] == 'bang'
 
 
 def test_dates():
