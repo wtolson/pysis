@@ -3,6 +3,12 @@
 History
 -------
 
+0.5.1 (2015-05-18)
+~~~~~~~~~~~~~~~~~~
+* Add support for line comments.
+* Fix packages in setup.py. (thanks @michaelaye)
+
+
 0.5.0 (2015-04-18)
 ~~~~~~~~~~~~~~~~~~
 * Add support for python 2.6/3.3/3.4
