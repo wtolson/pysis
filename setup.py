@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     from distutils.core import setup
 
@@ -19,13 +19,14 @@ setup(
     author='Trevor Olson',
     author_email='trevor@heytrevor.com',
     url='https://github.com/wtolson/pysis',
-    packages=[
-        'pysis',
-        'pysis.binning',
-        'pysis.util',
-    ],
-    package_dir={'pysis':
-                 'pysis'},
+    # packages=[
+    #     'pysis',
+    #     'pysis.binning',
+    #     'pysis.util',
+    # ],
+    # package_dir={'pysis':
+    #              'pysis'},
+    packages = find_packages(),
     include_package_data=True,
     install_requires=[
         'numpy',
