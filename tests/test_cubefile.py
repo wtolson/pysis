@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pytest
 import os
 import numpy
 from numpy.testing import assert_almost_equal
@@ -31,3 +32,8 @@ def test_cubefile():
 
     expected = numpy.loadtxt(os.path.join(DATA_DIR, 'pattern.txt'), skiprows=2)
     assert_almost_equal(image.data[0], expected)
+
+
+def test_stream_error():
+    with pytest.raises(TypeError):
+        CubeFile('filename.cub')

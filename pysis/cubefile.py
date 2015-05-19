@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy
+
+from six import string_types
 from six.moves import range
 
 from .labels import load as load_label
@@ -45,6 +47,13 @@ class CubeFile(object):
 
         :param filename: an optional filename to attach to the object
         """
+        if isinstance(stream, string_types):
+            error_msg = (
+                'A file like object is expected for stream. '
+                'Use %s.open(filename) to open a image file.'
+            )
+            raise TypeError(error_msg % type(self).__name__)
+
         #: The filename if given, otherwise none.
         self.filename = filename
 
