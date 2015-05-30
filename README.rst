@@ -14,7 +14,7 @@ Pysis
 
 Toolkit for using USGS Isis in Python.
 
-* Free software: GPLv3 license
+* Free software: BSD license
 * Documentation: http://pysis.readthedocs.org.
 
 
