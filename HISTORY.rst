@@ -3,6 +3,11 @@
 History
 -------
 
+0.5.2 (2015-05-30)
+~~~~~~~~~~~~~~~~~~
+* Relicense as BSD.
+
+
 0.5.1 (2015-05-18)
 ~~~~~~~~~~~~~~~~~~
 * Add support for line comments.
