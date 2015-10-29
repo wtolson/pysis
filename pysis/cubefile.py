@@ -10,6 +10,7 @@ from .specialpixels import SPECIAL_PIXELS
 
 
 class CubeFile(object):
+
     """A Isis Cube file reader."""
 
     PIXEL_TYPES = {
@@ -53,6 +54,7 @@ class CubeFile(object):
         else:
             #: The filename if given, otherwise none.
             self.filename = filename
+            stream = stream_or_fname
 
         #: The parsed label header in dictionary form.
         self.label = self._parse_label(stream)
