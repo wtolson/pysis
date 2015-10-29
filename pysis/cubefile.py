@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy
-
 from six import string_types
+
 from six.moves import range
 
 from .labels import load as load_label
@@ -40,22 +40,19 @@ class CubeFile(object):
         with open(filename, 'rb') as fp:
             return cls(fp, filename)
 
-    def __init__(self, stream, filename=None):
+    def __init__(self, stream_or_fname, filename=None):
         """Create an Isis Cube file.
 
         :param stream: file object to read as an isis cube file
 
         :param filename: an optional filename to attach to the object
         """
-        if isinstance(stream, string_types):
-            error_msg = (
-                'A file like object is expected for stream. '
-                'Use %s.open(filename) to open a image file.'
-            )
-            raise TypeError(error_msg % type(self).__name__)
-
-        #: The filename if given, otherwise none.
-        self.filename = filename
+        if isinstance(stream_or_fname, string_types):
+            self.filename = stream_or_fname
+            stream = open(stream_or_fname, 'rb')
+        else:
+            #: The filename if given, otherwise none.
+            self.filename = filename
 
         #: The parsed label header in dictionary form.
         self.label = self._parse_label(stream)
