@@ -100,7 +100,7 @@ command uses `getkey` to receive values from the label of an ISIS cube::
 Catching ProcessingErrors
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Pysis supports catching `ISIS` processing errors like so:
+Pysis supports catching `ISIS` processing errors like so::
 
     from pysis.exceptions import ProcessError
     from pysis.isis import hi2sis
