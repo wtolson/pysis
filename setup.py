@@ -20,7 +20,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'numpy',
-        'pytz',
+        'pvl',
         'six',
     ],
     license='BSD',

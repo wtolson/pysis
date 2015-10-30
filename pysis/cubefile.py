@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import numpy
-from six import string_types
+import pvl
 
+from six import string_types
 from six.moves import range
 
-from .labels import load as load_label
 from .specialpixels import SPECIAL_PIXELS
 
 
@@ -230,7 +230,7 @@ class CubeFile(object):
         return self.bands * self.lines * self.samples
 
     def _parse_label(self, stream):
-        return load_label(stream)
+        return pvl.load(stream)
 
     def _parse_data(self, stream):
         stream.seek(self.start_byte)
