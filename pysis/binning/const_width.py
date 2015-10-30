@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import ceil
+from six.moves import range
 from .abstract import AbstractBinnedKeys
 
 
@@ -24,7 +25,7 @@ class ConstWidthBinnedKeys(AbstractBinnedKeys):
         self.num_bins = int(num_bins)
 
         self.bin_size = (self.max_value - self.min_value) / self.num_bins
-        self.bins = [[] for _ in xrange(self.num_bins)]
+        self.bins = [[] for _ in range(self.num_bins)]
 
     def get_bin_index(self, value):
         """Used to get the index of the bin to place a particular value."""

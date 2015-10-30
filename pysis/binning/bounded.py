@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from bisect import bisect
+from six.moves import range
 from .abstract import AbstractBinnedKeys
 
 
@@ -19,7 +20,7 @@ class BoundedBinnedKeys(AbstractBinnedKeys):
         self.max_value = bounds[-1]
 
         self.num_bins = len(bounds) - 1
-        self.bins = [[] for _ in xrange(self.num_bins)]
+        self.bins = [[] for _ in range(self.num_bins)]
 
     def get_bin_index(self, value):
         """Used to get the index of the bin to place a particular value."""

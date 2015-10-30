@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import log, ceil
+from six.moves import range
 from .abstract import AbstractBinnedKeys
 
 
@@ -24,7 +25,7 @@ class GeometricBinnedKeys(AbstractBinnedKeys):
         self.max_value = pow(2.0, self.num_bins / 2.0) * self.min_value
         self.num_bins = int(self.num_bins)
 
-        self.bins = [[] for _ in xrange(self.num_bins)]
+        self.bins = [[] for _ in range(self.num_bins)]
 
     def get_bin_index(self, value):
         """Used to get the index of the bin to place a particular value."""

@@ -3,6 +3,7 @@
 from collections import namedtuple
 from itertools import izip
 from abc import ABCMeta, abstractmethod
+from six.moves import range
 
 
 __all__ = [
@@ -61,7 +62,7 @@ class AbstractBinnedKeys(object):
 
     def iterbounds(self):
         """An iterator over each bins bounds."""
-        for bin_num in xrange(self.num_bins):
+        for bin_num in range(self.num_bins):
             yield self.get_bounds(bin_num)
 
     def iterbins_bounds(self):
