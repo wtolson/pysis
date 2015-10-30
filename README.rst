@@ -97,6 +97,20 @@ command uses `getkey` to receive values from the label of an ISIS cube::
                    keyword='minimumringradius', grp='mapping')
 
 
+Catching ProcessingErrors
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pysis supports catching `ISIS` processing errors like so:
+
+    from pysis.exceptions import ProcessError
+    from pysis.isis import hi2sis
+    
+    try:
+        hi2isis(from_=filein, to=fileout)
+    except ProcessError as e:
+        print("STDOUT:", e.stdout)
+        print("STDERR:", e.stderr)
+        
 Multiprocessing Isis Commands with IsisPool
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
