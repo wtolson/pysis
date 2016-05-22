@@ -3,6 +3,12 @@
 History
 -------
 
+0.6.0 (2016-05-22)
+~~~~~~~~~~~~~~~~~~
+* Support filenames in image constructor. (thanks @michaelaye)
+* Use pvl for label decoding.
+
+
 0.5.2 (2015-05-30)
 ~~~~~~~~~~~~~~~~~~
 * Relicense as BSD.

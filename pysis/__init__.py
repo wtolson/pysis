@@ -2,7 +2,7 @@
 
 __author__ = 'Trevor Olson'
 __email__ = 'trevor@heytrevor.com'
-__version__ = '0.5.2'
+__version__ = '0.6.0'
 
 
 __all__ = [  # noqa
