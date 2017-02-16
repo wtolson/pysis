@@ -110,8 +110,12 @@ class CubeFile(object):
             data = self.data
 
         data[data == self.specials['Null']] = numpy.nan
-        data[data < self.specials['Min']] = numpy.NINF
-        data[data > self.specials['Max']] = numpy.inf
+        with numpy.errstate(invalid='ignore'):
+            # we can do this here, because we know that the operations do the right thing
+            # which is, where there's a numpy.nan the indexing returns False,
+            # so no new value will be set there. That's what we want.
+            data[data < self.specials['Min']] = numpy.NINF
+            data[data > self.specials['Max']] = numpy.inf
 
         return data
 
