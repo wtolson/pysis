@@ -12,20 +12,18 @@ __all__ = [
     'ISIS_VERSION_MAJOR',
     'ISIS_VERSION_MINOR',
     'ISIS_VERSION_PATCH',
-    'ISIS_VERSION_BUILD',
     'require_isis_version'
 ]
 
 ISIS_ROOT = os.environ.setdefault('ISISROOT', '/usgs/pkgs/isis3/isis')
 try:
     with open(path.join(ISIS_ROOT, 'version')) as _f:
-        ISIS_VERSION = _f.readline().strip()
-
+        ISIS_VERSION = _f.readline().split('#')[0].strip()
     ISIS_VERISON_TUPLE = tuple(map(int, ISIS_VERSION.split('.')))
 
     (
         ISIS_VERSION_MAJOR, ISIS_VERSION_MINOR,
-        ISIS_VERSION_PATCH, ISIS_VERSION_BUILD
+        ISIS_VERSION_PATCH
     ) = ISIS_VERISON_TUPLE
 
 except:
@@ -33,7 +31,7 @@ except:
     warnings.warn('Could not find isis. Is `ISISROOT` set?', RuntimeWarning)
 
     (ISIS_VERSION, ISIS_VERSION_MAJOR, ISIS_VERSION_MINOR,
-        ISIS_VERSION_PATCH, ISIS_VERSION_BUILD) = 5 * (None,)
+        ISIS_VERSION_PATCH) = 5 * (None,)
 
 if ISIS_VERSION_MAJOR == 3:
     # Check for the ISIS3DATA directory. If it does not exist use a default
