@@ -31,7 +31,7 @@ except:
     warnings.warn('Could not find isis. Is `ISISROOT` set?', RuntimeWarning)
 
     (ISIS_VERSION, ISIS_VERSION_MAJOR, ISIS_VERSION_MINOR,
-        ISIS_VERSION_PATCH) = 5 * (None,)
+        ISIS_VERSION_PATCH) = 4 * (None,)
 
 if ISIS_VERSION_MAJOR == 3:
     # Check for the ISIS3DATA directory. If it does not exist use a default
@@ -64,23 +64,23 @@ else:
     QT_PLUGIN_PATH = None
 
 
-def check_isis_version(major, minor=0, patch=0, build=0):
+def check_isis_version(major, minor=0, patch=0):
     """Checks that the current isis version is equal to or above the suplied
     version."""
-    if ISIS_VERSION and (major, minor, patch, build) <= ISIS_VERISON_TUPLE:
+    if ISIS_VERSION and (major, minor, patch) <= ISIS_VERISON_TUPLE:
         return
 
-    msg = 'Version %s.%s.%s.%s of isis required (%s found).'
-    raise VersionError(msg % (major, minor, patch, build, ISIS_VERSION))
+    msg = 'Version %s.%s.%s of isis required (%s found).'
+    raise VersionError(msg % (major, minor, patch, ISIS_VERSION))
 
 
-def require_isis_version(major, minor=0, patch=0, build=0):
+def require_isis_version(major, minor=0, patch=0):
     """Decorator that ensures a function is called with a minimum isis version.
     """
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            check_isis_version(major, minor, patch, build)
+            check_isis_version(major, minor, patch)
             return fn(*args, **kwargs)
         return wrapper
     return decorator

@@ -4,6 +4,7 @@ language: python
 sudo: false
 
 python:
+  - "3.6"
   - "3.5"
   - "3.4"
   - "3.3"
@@ -11,10 +12,19 @@ python:
   - "2.6"
 
 install:
-  - pip install -r requirements.txt
+  - |
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      curl -o miniconda.sh  https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda config --set always_yes yes --set changeps1 no
+  - source activate base
+  - conda env update -f environment.yaml
+  - conda install python=$PYTHON_VERSION
+  - python setup.py install
   - bash tests/make_isis_env.sh
 
-before_script:
-    - flake8 pysis
-
-script: ISISROOT=/tmp/pysis/isis py.test tests
+script: ISISROOT=/tmp/pysis/isis pytest tests

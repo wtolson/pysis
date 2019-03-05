@@ -26,7 +26,7 @@ def test_version():
     assert isinstance(ISIS_VERSION_MAJOR, int)
     assert isinstance(ISIS_VERSION_MINOR, int)
     assert isinstance(ISIS_VERSION_PATCH, int)
-    assert ISIS_VERSION == '%d.%d.%d.%d' % (
+    assert ISIS_VERSION == '%d.%d.%d' % (
         ISIS_VERSION_MAJOR, ISIS_VERSION_MINOR,
         ISIS_VERSION_PATCH
     )
@@ -63,13 +63,6 @@ def test_check_isis_version():
             ISIS_VERSION_MAJOR,
             ISIS_VERSION_MINOR,
             ISIS_VERSION_PATCH + 1,
-        )
-
-    with pytest.raises(VersionError):
-        check_isis_version(
-            ISIS_VERSION_MAJOR,
-            ISIS_VERSION_MINOR,
-            ISIS_VERSION_PATCH,
         )
 
 
