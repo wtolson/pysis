@@ -1,0 +1,42 @@
+{% set name = "pysis" %}
+{% set version = "0.7.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  # url: https://github.com/Kelvinrr/{{ name }}/archive/{{ version }}.tar.gz
+  # sha256: f79f477c3bfadc3cc08e4958b5c5b969df9cb94f6b1aba528be0387a67b75ece
+  path: ../
+
+requirements:
+  run:
+    - python
+    - pvl
+    - numpy
+    - six
+  build:
+    - python
+    - numpy
+    - six
+    - pvl
+    - pytest
+
+build:
+  number: 0
+  script:
+    - bash tests/make_isis_env.sh
+    - python setup.py install
+    - ISISROOT=/tmp/pysis/isis pytest tests
+
+about:
+  home: https://github.com/wtolson/pysis
+  license_file: LICENSE
+  license: BSD-3-Clause
+  license_family: BSD
+  summary: Toolkit for using USGS Isis in Python
+
+extra:
+  recipe-maintainers:
+    - kelvinrr
