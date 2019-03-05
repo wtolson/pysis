@@ -57,6 +57,8 @@ class IsisCommand(object):
         return self.call(**kwargs)
 
 
+
+
 class Isis(object):
     def __init__(self, strict=False, path=ISIS_PATH):
         self._strict = strict
@@ -84,5 +86,5 @@ class Isis(object):
 
     def __getattr__(self, name):
         if self._strict:
-            return super(Isis, self).__getattr__(name)
+            return getattr(super(Isis, self), name)
         return IsisCommand(name)
