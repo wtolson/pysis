@@ -6,10 +6,9 @@ mkdir -p $ROOT_DIR/isis/bin
 mkdir -p $ROOT_DIR/data
 mkdir -p $ROOT_DIR/testData
 
-echo '3.4.8.6010
-2014-11-26   # Version date
-v002         # 3rd party libraries version
-stable       # release stage (alpha, beta, stable)
+echo '3.6.1        # Public version number
+2019-04-26   # Release date
+alpha        # release stage (alpha, beta, stable)
 ' > $ROOT_DIR/isis/version
 
 echo '#!/usr/bin/env bash

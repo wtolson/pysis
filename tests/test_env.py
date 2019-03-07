@@ -7,7 +7,6 @@ from pysis import (
     ISIS_VERSION_MAJOR,
     ISIS_VERSION_MINOR,
     ISIS_VERSION_PATCH,
-    ISIS_VERSION_BUILD,
     check_isis_version,
     require_isis_version,
 )
@@ -27,10 +26,9 @@ def test_version():
     assert isinstance(ISIS_VERSION_MAJOR, int)
     assert isinstance(ISIS_VERSION_MINOR, int)
     assert isinstance(ISIS_VERSION_PATCH, int)
-    assert isinstance(ISIS_VERSION_BUILD, int)
-    assert ISIS_VERSION == '%d.%d.%d.%d' % (
+    assert ISIS_VERSION == '%d.%d.%d' % (
         ISIS_VERSION_MAJOR, ISIS_VERSION_MINOR,
-        ISIS_VERSION_PATCH, ISIS_VERSION_BUILD
+        ISIS_VERSION_PATCH
     )
 
 
@@ -41,7 +39,6 @@ def test_check_isis_version():
         ISIS_VERSION_MAJOR,
         ISIS_VERSION_MINOR,
         ISIS_VERSION_PATCH,
-        ISIS_VERSION_BUILD,
     )
 
     with pytest.raises(VersionError):
@@ -52,7 +49,6 @@ def test_check_isis_version():
             ISIS_VERSION_MAJOR + 1,
             ISIS_VERSION_MINOR,
             ISIS_VERSION_PATCH,
-            ISIS_VERSION_BUILD,
         )
 
     with pytest.raises(VersionError):
@@ -60,7 +56,6 @@ def test_check_isis_version():
             ISIS_VERSION_MAJOR,
             ISIS_VERSION_MINOR + 1,
             ISIS_VERSION_PATCH,
-            ISIS_VERSION_BUILD,
         )
 
     with pytest.raises(VersionError):
@@ -68,15 +63,6 @@ def test_check_isis_version():
             ISIS_VERSION_MAJOR,
             ISIS_VERSION_MINOR,
             ISIS_VERSION_PATCH + 1,
-            ISIS_VERSION_BUILD,
-        )
-
-    with pytest.raises(VersionError):
-        check_isis_version(
-            ISIS_VERSION_MAJOR,
-            ISIS_VERSION_MINOR,
-            ISIS_VERSION_PATCH,
-            ISIS_VERSION_BUILD + 1,
         )
 
 

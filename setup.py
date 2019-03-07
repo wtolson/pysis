@@ -3,26 +3,19 @@
 
 from setuptools import setup, find_packages
 
-
 readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
-
 setup(
     name='pysis',
-    version='0.6.0',
+    version='0.6.1',
     description='Toolkit for using USGS Isis in Python.',
     long_description=readme + '\n\n' + history,
     author='Trevor Olson',
     author_email='trevor@heytrevor.com',
     url='https://github.com/wtolson/pysis',
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests"]),
     include_package_data=True,
-    install_requires=[
-        'numpy',
-        'pvl',
-        'six',
-    ],
     license='BSD',
     zip_safe=False,
     keywords='pysis',
@@ -37,5 +30,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.6'
     ]
 )
