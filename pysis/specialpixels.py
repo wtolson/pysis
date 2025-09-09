@@ -17,7 +17,7 @@ __all__ = ['SPECIAL_PIXELS']
 
 
 def _make_num(num, dtype):
-    return numpy.fromstring(num, dtype=dtype)[0]
+    return numpy.frombuffer(num, dtype=dtype)[0]
 
 
 SPECIAL_PIXELS = {
