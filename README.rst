@@ -1,3 +1,14 @@
+=========================
+Attention
+=========================
+
+This library is not maintained anymore.
+We recommend using the actively maintained library `kalasiris <https://github.com/rbeyer/kalasiris>`_ by Ross Beyer , 
+which is also backed in support by the `PlanetaryPy <https://github.com/planetarypy>`_ organisation , where kalasiris is an affiliated package.
+
+
+former beginning of Readme:
+
 ===============================
 Pysis
 ===============================
