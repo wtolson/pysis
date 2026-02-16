@@ -33,7 +33,7 @@ except:
     (ISIS_VERSION, ISIS_VERSION_MAJOR, ISIS_VERSION_MINOR,
         ISIS_VERSION_PATCH) = 4 * (None,)
 
-if ISIS_VERSION_MAJOR == 3:
+if ISIS_VERSION_MAJOR >= 3:
     # Check for the ISIS3DATA directory. If it does not exist use a default
     ISIS_DATA = path.normpath(path.join(ISIS_ROOT, '../data'))
     if not path.exists(ISIS_DATA):
